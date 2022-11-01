@@ -1,0 +1,14 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Spring Boot-SupplierApplication<peazy-supplier>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.peazy.supplier.SupplierApplication",
+            "projectName": "peazy-supplier",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        }
+    ]
+}
