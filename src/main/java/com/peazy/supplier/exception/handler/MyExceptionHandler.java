@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 import com.peazy.supplier.exception.ErrorCodeException;
 import com.peazy.supplier.model.entity.ErrorCodeEntity;
-import com.peazy.supplier.model.resp.ErrorResponse;
+import com.peazy.supplier.model.response.ErrorResponse;
 import com.peazy.supplier.repository.ErrorCodeRepository;
 
  @ControllerAdvice

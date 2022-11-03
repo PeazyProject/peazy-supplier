@@ -1,4 +1,4 @@
-package com.peazy.supplier.model.resp;
+package com.peazy.supplier.model.response;
 
 
 import java.io.Serializable;

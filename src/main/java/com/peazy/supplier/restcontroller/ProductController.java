@@ -13,21 +13,22 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.peazy.supplier.model.entity.SupplierUserEntity;
-import com.peazy.supplier.service.interfaces.SupplierUserService;
+import com.peazy.supplier.model.entity.SupplierProductEntity;
+import com.peazy.supplier.model.response.QueryProductResponse;
+import com.peazy.supplier.service.interfaces.ProductService;
 
 @CrossOrigin
 @RestController
-@RequestMapping(path = "/user",produces = MediaType.APPLICATION_JSON_VALUE)
-public class UserController {
+@RequestMapping(path = "/product",produces = MediaType.APPLICATION_JSON_VALUE)
+public class ProductController {
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
 
 	@Autowired
-	private SupplierUserService supplierUserService;
+	private ProductService productService;
 
-	@PostMapping(value = "/getSupplierUsers")
-	public ResponseEntity<List<SupplierUserEntity>> getSupplierUsers() throws JsonProcessingException {
-		List<SupplierUserEntity> result = supplierUserService.getUsers();
+	@PostMapping(value = "/queryProduct")
+	public ResponseEntity<QueryProductResponse> queryProduct() throws JsonProcessingException {
+		QueryProductResponse result = productService.queryProduct();
 		logger.info("getSupplierUsers = {}", result);
 		return ResponseEntity.ok(result);
 	}
