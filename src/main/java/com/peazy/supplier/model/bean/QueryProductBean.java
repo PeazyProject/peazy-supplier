@@ -14,4 +14,13 @@ public class QueryProductBean {
     private Date createDt;
     private String productStatus;
     private int productQty;
+    private byte[] mainPic;
+
+    @Override
+    public String toString() {
+        return "QueryProductBean [productName=" + productName + ", snCode=" + snCode + ", price=" + price
+                + ", category=" + category + ", sku=" + sku + ", createDt=" + createDt + ", productStatus="
+                + productStatus + ", productQty=" + productQty + "]";
+    }
+    
 }

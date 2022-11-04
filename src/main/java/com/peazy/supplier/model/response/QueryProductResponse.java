@@ -8,5 +8,5 @@ import lombok.Data;
 
 @Data
 public class QueryProductResponse {
-    List<QueryProductBean> QueryProductList;
+    List<QueryProductBean> queryProductList;
 }
