@@ -6,15 +6,20 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.peazy.supplier.model.bean.BlobDocumentBean;
 import com.peazy.supplier.model.bean.QueryProductBean;
 import com.peazy.supplier.model.dto.GetProductByFilterDto;
 import com.peazy.supplier.model.entity.CommonPictureEntity;
+import com.peazy.supplier.model.request.QueryProductRequest;
 import com.peazy.supplier.model.response.QueryProductResponse;
 import com.peazy.supplier.repository.CommonPictureRepository;
 import com.peazy.supplier.repository.SupplierProductRepository;
 import com.peazy.supplier.service.interfaces.ProductService;
+
 
 @Service
 public class ProductServiceImpl implements ProductService {
@@ -26,8 +31,18 @@ public class ProductServiceImpl implements ProductService {
 	private CommonPictureRepository commonPictureRepository;
 
 	@Override
-	public QueryProductResponse queryProduct() throws JsonProcessingException {
-		List<GetProductByFilterDto> supplierProductEntity = supplierProductRepository.queryProduct();
+	public QueryProductResponse queryProduct(QueryProductRequest queryProductRequest) throws JsonProcessingException {
+
+		if (CollectionUtils.isEmpty(queryProductRequest.getSkuList())) {
+			queryProductRequest.setSkuList(null);
+		}
+
+		if (CollectionUtils.isEmpty(queryProductRequest.getInStockList())) {
+			queryProductRequest.setInStockList(null);
+		}
+
+		List<GetProductByFilterDto> supplierProductEntity = supplierProductRepository.queryProduct(
+			queryProductRequest.getProductName(), queryProductRequest.getSkuList(), queryProductRequest.getIsAvailable());
 		
 		List<QueryProductBean> queryProductList = new ArrayList<>();
 		for (GetProductByFilterDto getProductByFilterDto : supplierProductEntity) {
@@ -40,12 +55,39 @@ public class ProductServiceImpl implements ProductService {
 			queryProductBean.setCreateDt(getProductByFilterDto.getCreateDt());
 			queryProductBean.setProductStatus(getProductByFilterDto.getProductStatus());
 			queryProductBean.setProductQty(getProductByFilterDto.getProductQty());
-			queryProductList.add(queryProductBean);
+
+			if (isProductInStock(queryProductRequest.getInStockList(), queryProductBean.getProductQty())) {
+				queryProductList.add(queryProductBean);
+			}
+			
+
 		}
 
 		QueryProductResponse queryProductResponse = new QueryProductResponse();
 		queryProductResponse.setQueryProductList(queryProductList);
 		return queryProductResponse;
+	}
+
+	private boolean isProductInStock(List<String> inStockList, int productQty) {
+
+
+		if (CollectionUtils.isEmpty(inStockList)) {
+			return true;
+		}
+
+		if (inStockList.contains("Y")) {
+			if (productQty > 0) {
+				return true;
+			}
+		}
+
+		if (inStockList.contains("N")) {
+			if (productQty == 0) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	@Override

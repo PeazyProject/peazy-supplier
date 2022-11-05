@@ -12,12 +12,13 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.peazy.supplier.model.bean.BlobDocumentBean;
-import com.peazy.supplier.model.entity.SupplierProductEntity;
+import com.peazy.supplier.model.request.QueryProductRequest;
 import com.peazy.supplier.model.response.QueryProductResponse;
 import com.peazy.supplier.service.interfaces.ProductService;
 
@@ -31,10 +32,11 @@ public class ProductController {
 	private ProductService productService;
 
 	@PostMapping(value = "/queryProduct")
-	public ResponseEntity<QueryProductResponse> queryProduct() throws JsonProcessingException {
-		QueryProductResponse result = productService.queryProduct();
-		logger.info("getSupplierUsers = {}", result);
-		return ResponseEntity.ok(result);
+	public ResponseEntity<QueryProductResponse> queryProduct(@RequestBody QueryProductRequest queryProductRequest) throws JsonProcessingException {
+		logger.info("queryProductRequest = {}", queryProductRequest);
+		QueryProductResponse queryProductResponse = productService.queryProduct(queryProductRequest);
+		logger.info("queryProductResponse = {}", queryProductResponse);
+		return ResponseEntity.ok(queryProductResponse);
 	}
 
 	@GetMapping(value = "/getImgUrl/{snCode}")

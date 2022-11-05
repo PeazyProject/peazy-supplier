@@ -4,10 +4,12 @@ import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.peazy.supplier.model.dto.GetProductByFilterDto;
 import com.peazy.supplier.model.entity.SupplierProductEntity;
+import com.peazy.supplier.model.request.QueryProductRequest;
 
 @Repository
 public interface SupplierProductRepository extends JpaRepository<SupplierProductEntity, Long> {
@@ -36,6 +38,10 @@ public interface SupplierProductRepository extends JpaRepository<SupplierProduct
     + " ON Supplier_Product.ProductCategorySeqNo = Supplier_ProductCategory.SeqNo "
     + " INNER JOIN Supplier_Sku "
     + " ON Supplier_Product.MainSkuSeqNo = Supplier_Sku.SeqNo "
+    + " WHERE 1 = 1 "
+    + " AND (Supplier_Product.ProductName LIKE CONCAT('%' ,:productName ,'%') or NULLIF(:productName, '') is null) "
+    + " AND (COALESCE(:skuList, NULL) IS NULL OR (Supplier_Sku.Sku IN (:skuList))) "
+    + " AND (Supplier_Product.ProductStatus = :isAvailable or NULLIF(:isAvailable, '') is null or :isAvailable = 'ALL') "
     + " GROUP BY "
     + " Supplier_Product.ProductName, "
     + " Supplier_ProductPic.SnCode, "
@@ -44,6 +50,9 @@ public interface SupplierProductRepository extends JpaRepository<SupplierProduct
     + " Supplier_Sku.Sku, "
     + " Supplier_Product.CreateDt, "
     + " Supplier_Product.ProductStatus ", nativeQuery = true)
-    public List<GetProductByFilterDto> queryProduct();
+    public List<GetProductByFilterDto> queryProduct(
+        @Param("productName") String productName,
+        @Param("skuList") List<String> skuList,
+        @Param("isAvailable") String isAvailable);
     
 }
