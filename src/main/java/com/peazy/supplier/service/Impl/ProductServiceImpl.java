@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -55,7 +56,8 @@ public class ProductServiceImpl implements ProductService {
 			queryProductBean.setProductStatus(getProductByFilterDto.getProductStatus());
 			queryProductBean.setProductQty(getProductByFilterDto.getProductQty());
 
-			if (isProductInStock(queryProductRequest.getInStockList(), queryProductBean.getProductQty())) {
+			if (isProductInStock(queryProductRequest.getInStockList(), 
+				queryProductBean.getProductQty(), getProductByFilterDto.getProductStatus())) {
 				queryProductList.add(queryProductBean);
 			}
 			
@@ -67,7 +69,7 @@ public class ProductServiceImpl implements ProductService {
 		return queryProductResponse;
 	}
 
-	private boolean isProductInStock(List<String> inStockList, int productQty) {
+	private boolean isProductInStock(List<String> inStockList, int productQty, String productStatus) {
 
 
 		if (CollectionUtils.isEmpty(inStockList)) {
@@ -75,7 +77,7 @@ public class ProductServiceImpl implements ProductService {
 		}
 
 		if (inStockList.contains("Y")) {
-			if (productQty > 0) {
+			if (productQty > 0 && !StringUtils.equals(productStatus, "OUT_OF_STOCK")) {
 				return true;
 			}
 		}

@@ -49,7 +49,8 @@ public interface SupplierProductRepository extends JpaRepository<SupplierProduct
     + " Supplier_ProductCategory.Category, "
     + " Supplier_Sku.Sku, "
     + " Supplier_Product.CreateDt, "
-    + " Supplier_Product.ProductStatus ", nativeQuery = true)
+    + " Supplier_Product.ProductStatus "
+    + " ORDER BY Supplier_Product.CreateDt ", nativeQuery = true)
     public List<GetProductByFilterDto> queryProduct(
         @Param("productName") String productName,
         @Param("skuList") List<String> skuList,
