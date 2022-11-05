@@ -7,6 +7,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.peazy.supplier.model.bean.BlobDocumentBean;
 import com.peazy.supplier.model.bean.QueryProductBean;
 import com.peazy.supplier.model.dto.GetProductByFilterDto;
 import com.peazy.supplier.model.entity.CommonPictureEntity;
@@ -39,7 +40,6 @@ public class ProductServiceImpl implements ProductService {
 			queryProductBean.setCreateDt(getProductByFilterDto.getCreateDt());
 			queryProductBean.setProductStatus(getProductByFilterDto.getProductStatus());
 			queryProductBean.setProductQty(getProductByFilterDto.getProductQty());
-			queryProductBean.setMainPic(getMainPicture(getProductByFilterDto.getSnCode()).getPicture());
 			queryProductList.add(queryProductBean);
 		}
 
@@ -48,10 +48,14 @@ public class ProductServiceImpl implements ProductService {
 		return queryProductResponse;
 	}
 
-	private CommonPictureEntity getMainPicture(String snCode) {
+	@Override
+	public BlobDocumentBean getImgUrl(String snCode) throws JsonProcessingException {
 		Optional<CommonPictureEntity> commonPicOptional = commonPictureRepository.findById(snCode);
 		if (commonPicOptional.isPresent()) {
-			return commonPicOptional.get();
+			BlobDocumentBean blobDocumentBean = new BlobDocumentBean();
+			blobDocumentBean.setName(commonPicOptional.get().getPictureName() + commonPicOptional.get().getPictureExtension());
+			blobDocumentBean.setContent(commonPicOptional.get().getPicture());
+			return blobDocumentBean;
 		}
 		return null;
 	}
