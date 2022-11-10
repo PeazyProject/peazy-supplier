@@ -42,10 +42,30 @@ public class ProductController {
 	@GetMapping(value = "/getImgUrl/{snCode}")
 	public ResponseEntity<Object> getImgUrl(@PathVariable String snCode) throws JsonProcessingException {
 
-		logger.info("getImgUrl snCode = {}", snCode);
 		BlobDocumentBean result = productService.getImgUrl(snCode);
 		return ResponseEntity.status(HttpStatus.OK)
 			.header("content-disposition", "attachment; filename=\"" + result.getName() + "\"").body(result.getContent());
+	}
+
+	@GetMapping(value = "/getProductSizeOption")
+	public ResponseEntity<List<String>> getProductSizeOption() throws JsonProcessingException {
+
+		List<String> result = productService.getProductSizeOption();
+		return ResponseEntity.ok(result);
+	}
+
+	@GetMapping(value = "/getProductColorOption")
+	public ResponseEntity<List<String>> getProductColorOption() throws JsonProcessingException {
+
+		List<String> result = productService.getProductColorOption();
+		return ResponseEntity.ok(result);
+	}
+
+	@GetMapping(value = "/getProductCategoryOption")
+	public ResponseEntity<List<String>> getProductCategoryOption() throws JsonProcessingException {
+
+		List<String> result = productService.getProductCategoryOption();
+		return ResponseEntity.ok(result);
 	}
 
 }

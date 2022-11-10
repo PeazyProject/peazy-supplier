@@ -14,10 +14,16 @@ import com.peazy.supplier.model.bean.BlobDocumentBean;
 import com.peazy.supplier.model.bean.QueryProductBean;
 import com.peazy.supplier.model.dto.GetProductByFilterDto;
 import com.peazy.supplier.model.entity.CommonPictureEntity;
+import com.peazy.supplier.model.entity.SupplierProductCategoryEntity;
+import com.peazy.supplier.model.entity.SupplierProductColorEntity;
+import com.peazy.supplier.model.entity.SupplierProductSizeEntity;
 import com.peazy.supplier.model.request.QueryProductRequest;
 import com.peazy.supplier.model.response.QueryProductResponse;
 import com.peazy.supplier.repository.CommonPictureRepository;
+import com.peazy.supplier.repository.SupplierProductCategoryRepository;
+import com.peazy.supplier.repository.SupplierProductColorRepository;
 import com.peazy.supplier.repository.SupplierProductRepository;
+import com.peazy.supplier.repository.SupplierProductSizeRepository;
 import com.peazy.supplier.service.interfaces.ProductService;
 
 
@@ -29,6 +35,15 @@ public class ProductServiceImpl implements ProductService {
 
 	@Autowired
 	private CommonPictureRepository commonPictureRepository;
+
+	@Autowired
+	private SupplierProductSizeRepository supplierProductSizeRepository;
+
+	@Autowired
+	private SupplierProductColorRepository supplierProductColorRepository;
+
+	@Autowired
+	private SupplierProductCategoryRepository supplierProductCategoryRepository;
 
 	@Override
 	public QueryProductResponse queryProduct(QueryProductRequest queryProductRequest) throws JsonProcessingException {
@@ -101,6 +116,40 @@ public class ProductServiceImpl implements ProductService {
 			return blobDocumentBean;
 		}
 		return null;
+	}
+
+	@Override
+	public List<String> getProductSizeOption() throws JsonProcessingException {
+		List<SupplierProductSizeEntity> sizeEntities = supplierProductSizeRepository.findAll();
+
+		List<String> sizeList = new ArrayList<>();
+		for (SupplierProductSizeEntity entity : sizeEntities) {
+			sizeList.add(entity.getSize());
+		}
+		return sizeList;
+	}
+
+	@Override
+	public List<String> getProductColorOption() throws JsonProcessingException {
+		List<SupplierProductColorEntity> colorEntities = supplierProductColorRepository.findAll();
+
+		List<String> colorList = new ArrayList<>();
+		for (SupplierProductColorEntity entity : colorEntities) {
+			colorList.add(entity.getColor());
+		}
+		return colorList;
+	}
+
+	@Override
+	public List<String> getProductCategoryOption() throws JsonProcessingException {
+
+		List<SupplierProductCategoryEntity> categoryEntities = supplierProductCategoryRepository.findAll();
+
+		List<String> categoryList = new ArrayList<>();
+		for (SupplierProductCategoryEntity entity : categoryEntities) {
+			categoryList.add(entity.getCategory());
+		}
+		return categoryList;
 	}
 
 }
