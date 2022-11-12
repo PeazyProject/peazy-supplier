@@ -15,6 +15,7 @@ import com.peazy.supplier.model.request.QueryProductRequest;
 public interface SupplierProductRepository extends JpaRepository<SupplierProductEntity, Long> {
 
     @Query(value = "SELECT DISTINCT "
+    + "     Supplier_Product.SeqNo, "
     + "     Supplier_Product.ProductName, "
     + "     Supplier_ProductPic.SnCode, "
     + "     Supplier_Product.Price, "
@@ -43,6 +44,7 @@ public interface SupplierProductRepository extends JpaRepository<SupplierProduct
     + " AND (COALESCE(:skuList, NULL) IS NULL OR (Supplier_Sku.Sku IN (:skuList))) "
     + " AND (Supplier_Product.ProductStatus = :isAvailable or NULLIF(:isAvailable, '') is null or :isAvailable = 'ALL') "
     + " GROUP BY "
+    + " Supplier_Product.SeqNo, "
     + " Supplier_Product.ProductName, "
     + " Supplier_ProductPic.SnCode, "
     + " Supplier_Product.Price, "

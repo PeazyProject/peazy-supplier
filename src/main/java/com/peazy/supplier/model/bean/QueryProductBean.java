@@ -6,6 +6,7 @@ import lombok.Data;
 
 @Data
 public class QueryProductBean {
+    private String productSeqNo;
     private String productName;
     private String snCode;
     private int price;
@@ -14,5 +15,4 @@ public class QueryProductBean {
     private Date createDt;
     private String productStatus;
     private int productQty;
-    
 }

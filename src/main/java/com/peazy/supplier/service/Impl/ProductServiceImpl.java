@@ -62,6 +62,7 @@ public class ProductServiceImpl implements ProductService {
 		List<QueryProductBean> queryProductList = new ArrayList<>();
 		for (GetProductByFilterDto getProductByFilterDto : supplierProductEntity) {
 			QueryProductBean queryProductBean = new QueryProductBean();
+			queryProductBean.setProductSeqNo(getProductByFilterDto.getSeqNo());
 			queryProductBean.setProductName(getProductByFilterDto.getProductName());
 			queryProductBean.setSnCode(getProductByFilterDto.getSnCode());
 			queryProductBean.setPrice(getProductByFilterDto.getPrice());
