@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.peazy.supplier.model.bean.BlobDocumentBean;
 import com.peazy.supplier.model.request.QueryProductRequest;
+import com.peazy.supplier.model.response.QueryProductBySeqNoResponse;
 import com.peazy.supplier.model.response.QueryProductResponse;
 import com.peazy.supplier.service.interfaces.ProductService;
 
@@ -66,6 +67,14 @@ public class ProductController {
 
 		List<String> result = productService.getProductCategoryOption();
 		return ResponseEntity.ok(result);
+	}
+
+	@PostMapping(value = "/queryProduct/{seqNo}")
+	public ResponseEntity<QueryProductBySeqNoResponse> queryProductBySeqNo(@PathVariable String seqNo) throws JsonProcessingException {
+		logger.info("queryProductBySeqNo = {}", seqNo);
+		QueryProductBySeqNoResponse queryProductBySeqNoResponse = productService.queryProductBySeqNo(seqNo);
+		logger.info("queryProductBySeqNoResponse = {}", queryProductBySeqNoResponse);
+		return ResponseEntity.ok(queryProductBySeqNoResponse);
 	}
 
 }

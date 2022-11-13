@@ -18,6 +18,7 @@ import com.peazy.supplier.model.entity.SupplierProductCategoryEntity;
 import com.peazy.supplier.model.entity.SupplierProductColorEntity;
 import com.peazy.supplier.model.entity.SupplierProductSizeEntity;
 import com.peazy.supplier.model.request.QueryProductRequest;
+import com.peazy.supplier.model.response.QueryProductBySeqNoResponse;
 import com.peazy.supplier.model.response.QueryProductResponse;
 import com.peazy.supplier.repository.CommonPictureRepository;
 import com.peazy.supplier.repository.SupplierProductCategoryRepository;
@@ -151,6 +152,14 @@ public class ProductServiceImpl implements ProductService {
 			categoryList.add(entity.getCategory());
 		}
 		return categoryList;
+	}
+
+	@Override
+	public QueryProductBySeqNoResponse queryProductBySeqNo(String seqNo) throws JsonProcessingException {
+
+		// TODO Auto-generated method stub
+
+		return null;
 	}
 
 }
