@@ -22,4 +22,10 @@ public enum UserErrorCodeEnumImpl implements ErrorCodeEunm {
 		return this.code;
 	}
 
+	@Override
+	public String getLang() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

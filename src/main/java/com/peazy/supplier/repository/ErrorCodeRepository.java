@@ -10,13 +10,12 @@ import com.peazy.supplier.model.entity.ErrorCodeEntity;
 
 public interface ErrorCodeRepository extends JpaRepository<ErrorCodeEntity, Long> {
 
-	@Query(value = "  select SeqNo "
-			+ "      ,Category "
-			+ "      ,ErrorCode "
-			+ "      ,ErrorMsg "
-			+ "      ,Lang　from Common.ErrorCode "
-			+ "	  where Category = :category and ErrorCode = :errorCode and lang='en-us' ",nativeQuery = true)
-	public Optional<ErrorCodeEntity> findByCategoryAndErrorCode(@Param("category") String category,@Param("errorCode")  String code);
-
-
+	@Query(value = "  select * "
+			+ "   from alanlee.Common_ErrorCode "
+			+ "	  where Category = :category and ErrorCode = :errorCode and Lang=:lang ",nativeQuery = true)
+	public Optional<ErrorCodeEntity> findByCategoryAndErrorCode(
+		@Param("category") String category,
+		@Param("errorCode")  String code, 
+		@Param("lang")  String lang);
+		
 }

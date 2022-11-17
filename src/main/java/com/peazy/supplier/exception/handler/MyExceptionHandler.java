@@ -1,6 +1,6 @@
- package com.peazy.supplier.exception.handler;
+package com.peazy.supplier.exception.handler;
 
- import java.util.HashMap;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -18,39 +18,49 @@ import com.peazy.supplier.model.entity.ErrorCodeEntity;
 import com.peazy.supplier.model.response.ErrorResponse;
 import com.peazy.supplier.repository.ErrorCodeRepository;
 
- @ControllerAdvice
- public class MyExceptionHandler {
+import org.apache.commons.lang3.StringUtils;
 
- 	@Autowired
- 	private ErrorCodeRepository errorCodeRepository;
+@ControllerAdvice
+public class MyExceptionHandler {
 
- 	@ResponseBody
- 	@ExceptionHandler(ErrorCodeException.class)
- 	@ResponseStatus(HttpStatus.BAD_REQUEST)
- 	ErrorResponse dispalyErrorMessage(ErrorCodeException ex) {
- 		ErrorResponse resp = new ErrorResponse();
- 		Optional<ErrorCodeEntity> entity = errorCodeRepository.findByCategoryAndErrorCode(ex.getErrorCode().getCategory(),
- 				ex.getErrorCode().getCode());
- 		resp.setCategory(ex.getErrorCode().getCategory());
- 		resp.setErrorCode(ex.getErrorCode().getCode());
- 		if(entity.isPresent()) {
- 			resp.setErrorMsg(entity.get().getErrorMsg());
- 		}else {
- 			resp.setErrorMsg("");
- 		}
- 		return resp;
- 	}
- 	
- 	@ResponseStatus(HttpStatus.BAD_REQUEST)
- 	@ExceptionHandler(MethodArgumentNotValidException.class)
- 	public Map<String, String> handleValidationExceptions(
- 	  MethodArgumentNotValidException ex) {
- 	    Map<String, String> errors = new HashMap<>();
- 	    ex.getBindingResult().getAllErrors().forEach((error) -> {
- 	        String fieldName = ((FieldError) error).getField();
- 	        String errorMessage = error.getDefaultMessage();
- 	        errors.put(fieldName, errorMessage);
- 	    });
- 	    return errors;
- 	}
- }
+	@Autowired
+	private ErrorCodeRepository errorCodeRepository;
+
+	@ResponseBody
+	@ExceptionHandler(ErrorCodeException.class)
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	ErrorResponse dispalyErrorMessage(ErrorCodeException ex) {
+		ErrorResponse resp = new ErrorResponse();
+
+	   String lang = ex.getErrorCode().getLang();
+	   if (StringUtils.isEmpty(lang)) {
+		   lang = "zh_tw";
+	   }
+
+		Optional<ErrorCodeEntity> entity = errorCodeRepository.findByCategoryAndErrorCode(
+		   ex.getErrorCode().getCategory(),
+			ex.getErrorCode().getCode(), 
+		   lang);
+		resp.setCategory(ex.getErrorCode().getCategory());
+		resp.setErrorCode(ex.getErrorCode().getCode());
+		if(entity.isPresent()) {
+			resp.setErrorMsg(entity.get().getErrorMsg());
+		}else {
+			resp.setErrorMsg("");
+		}
+		return resp;
+	}
+	
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	@ExceptionHandler(MethodArgumentNotValidException.class)
+	public Map<String, String> handleValidationExceptions(
+	  MethodArgumentNotValidException ex) {
+		Map<String, String> errors = new HashMap<>();
+		ex.getBindingResult().getAllErrors().forEach((error) -> {
+			String fieldName = ((FieldError) error).getField();
+			String errorMessage = error.getDefaultMessage();
+			errors.put(fieldName, errorMessage);
+		});
+		return errors;
+	}
+}
