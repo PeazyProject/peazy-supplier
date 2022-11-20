@@ -3,7 +3,7 @@ package com.peazy.supplier.model.dto;
 import java.util.Date;
 
 public interface GetProductByFilterDto  {
-	String getSeqNo();
+	String getProductSeqNo();
 	String getProductName();
 	String getSnCode();
 	int getPrice();
