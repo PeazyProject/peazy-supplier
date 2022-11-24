@@ -25,7 +25,7 @@ import com.peazy.supplier.service.interfaces.ProductService;
 
 @CrossOrigin
 @RestController
-@RequestMapping(path = "/product",produces = MediaType.APPLICATION_JSON_VALUE)
+@RequestMapping(path = "/product", produces = MediaType.APPLICATION_JSON_VALUE)
 public class ProductController {
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -33,7 +33,8 @@ public class ProductController {
 	private ProductService productService;
 
 	@PostMapping(value = "/queryProduct")
-	public ResponseEntity<QueryProductResponse> queryProduct(@RequestBody QueryProductRequest queryProductRequest) throws JsonProcessingException {
+	public ResponseEntity<QueryProductResponse> queryProduct(@RequestBody QueryProductRequest queryProductRequest)
+			throws JsonProcessingException {
 		logger.info("queryProductRequest = {}", queryProductRequest);
 		QueryProductResponse queryProductResponse = productService.queryProduct(queryProductRequest);
 		logger.info("queryProductResponse = {}", queryProductResponse);
@@ -45,7 +46,8 @@ public class ProductController {
 
 		BlobDocumentBean result = productService.getImgUrl(snCode);
 		return ResponseEntity.status(HttpStatus.OK)
-			.header("content-disposition", "attachment; filename=\"" + result.getName() + "\"").body(result.getContent());
+				.header("content-disposition", "attachment; filename=\"" + result.getName() + "\"")
+				.body(result.getContent());
 	}
 
 	@GetMapping(value = "/getProductSizeOption")
@@ -70,7 +72,8 @@ public class ProductController {
 	}
 
 	@PostMapping(value = "/queryProduct/{seqNo}")
-	public ResponseEntity<QueryProductBySeqNoResponse> queryProductBySeqNo(@PathVariable String seqNo) throws JsonProcessingException {
+	public ResponseEntity<QueryProductBySeqNoResponse> queryProductBySeqNo(@PathVariable String seqNo)
+			throws JsonProcessingException {
 		logger.info("queryProductBySeqNo = {}", seqNo);
 		QueryProductBySeqNoResponse queryProductBySeqNoResponse = productService.queryProductBySeqNo(seqNo);
 		logger.info("queryProductBySeqNoResponse = {}", queryProductBySeqNoResponse);
