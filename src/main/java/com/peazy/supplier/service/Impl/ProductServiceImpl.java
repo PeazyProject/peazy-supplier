@@ -5,19 +5,23 @@ import java.util.List;
 import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.peazy.supplier.model.bean.BlobDocumentBean;
+import com.peazy.supplier.model.bean.QueryCheckOrderItemBean;
 import com.peazy.supplier.model.bean.QueryProductBean;
+import com.peazy.supplier.model.dto.CheckOrderItemDto;
 import com.peazy.supplier.model.dto.GetProductByFilterDto;
 import com.peazy.supplier.model.entity.CommonPictureEntity;
 import com.peazy.supplier.model.entity.SupplierProductCategoryEntity;
 import com.peazy.supplier.model.entity.SupplierProductColorEntity;
 import com.peazy.supplier.model.entity.SupplierProductSizeEntity;
 import com.peazy.supplier.model.request.QueryProductRequest;
+import com.peazy.supplier.model.response.QueryCheckOrderResponse;
 import com.peazy.supplier.model.response.QueryProductBySeqNoResponse;
 import com.peazy.supplier.model.response.QueryProductResponse;
 import com.peazy.supplier.repository.CommonPictureRepository;
@@ -162,4 +166,19 @@ public class ProductServiceImpl implements ProductService {
 		return null;
 	}
 
+	@Override
+	public QueryCheckOrderResponse queryCheckOrder() throws JsonProcessingException {
+		QueryCheckOrderResponse response = new QueryCheckOrderResponse();
+		List<CheckOrderItemDto> checkOrderItemDtos = supplierProductRepository.queryCheckOrder();
+		List<QueryCheckOrderItemBean> queryCheckOrderItemBeanList = new ArrayList<>();
+
+		for (CheckOrderItemDto checkOrderItemDto : checkOrderItemDtos) {
+			QueryCheckOrderItemBean queryCheckOrderItemBean = new QueryCheckOrderItemBean();
+			BeanUtils.copyProperties(checkOrderItemDto, queryCheckOrderItemBean);
+			queryCheckOrderItemBeanList.add(queryCheckOrderItemBean);
+		}
+		response.setQueryCheckOrderItemBeanList(queryCheckOrderItemBeanList);
+
+		return response;
+	}
 }

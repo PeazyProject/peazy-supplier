@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import com.peazy.supplier.model.dto.CheckOrderItemDto;
 import com.peazy.supplier.model.dto.GetProductByFilterDto;
 import com.peazy.supplier.model.entity.SupplierProductEntity;
 import com.peazy.supplier.model.entity.SupplierProductViewEntity;
@@ -49,4 +50,25 @@ public interface SupplierProductRepository extends JpaRepository<SupplierProduct
             + "WHERE NotOrderCnt > 0  "
             + "ORDER BY ProductSeqNo", nativeQuery = true)
     public List<SupplierProductViewEntity> queryNotOrderProduct(@Param("vendorSeqNo") Long vendorSeqNo);
+
+    @Query(value = "SELECT supplier_product_view.ProductSeqNo, " +
+                    "supplier_product_view.ProductName, " +
+                    "supplier_product_view.SnCode, " +
+                    "supplier_product_view.Cost, " +
+                    "supplier_product_view.Category, " +
+                    "supplier_product_view.Sku, " +
+                    "supplier_product_view.CreateDt, " +
+                    "supplier_product_view.ProductStatus, " +
+                    "SUM(supplier_product_view.OrderedCnt) AS ProductOrderedCnt " +
+                    "FROM supplier_product_view " +
+                    "GROUP BY  " +
+                    "supplier_product_view.ProductSeqNo, " +
+                    "supplier_product_view.ProductName, " +
+                    "supplier_product_view.SnCode, " +
+                    "supplier_product_view.Cost, " +
+                    "supplier_product_view.Category, " +
+                    "supplier_product_view.Sku, " +
+                    "supplier_product_view.CreateDt, " +
+                    "supplier_product_view.ProductStatus ", nativeQuery = true)
+    public List<CheckOrderItemDto> queryCheckOrder();
 }
