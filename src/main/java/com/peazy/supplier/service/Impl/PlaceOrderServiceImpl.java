@@ -33,9 +33,9 @@ public class PlaceOrderServiceImpl implements PlaceOrderService {
         return supplierVendorRepository.findAll();
     }
 
-    public List<SupplierProductViewEntity> getOrderProductList(Long vendorSeqNo, boolean isNotOrder)
+    public List<SupplierProductViewEntity> getOrderProductList(Long vendorSeqNo, String type)
             throws JsonProcessingException {
-        return supplierProductViewRepository.queryOrderProduct(vendorSeqNo, isNotOrder);
+        return supplierProductViewRepository.queryOrderProduct(vendorSeqNo, type);
     }
 
     public void orderProducts(List<SupplierProductViewEntity> orderProductList) throws JsonProcessingException {

@@ -9,7 +9,7 @@ import com.peazy.supplier.model.entity.SupplierVendorEntity;
 public interface PlaceOrderService {
     List<SupplierVendorEntity> getVendorList() throws JsonProcessingException;
 
-    List<SupplierProductViewEntity> getOrderProductList(Long vendor, boolean isNotOrder) throws JsonProcessingException;
+    List<SupplierProductViewEntity> getOrderProductList(Long vendor, String type) throws JsonProcessingException;
 
     void orderProducts(List<SupplierProductViewEntity> orderProductList) throws JsonProcessingException;
 
