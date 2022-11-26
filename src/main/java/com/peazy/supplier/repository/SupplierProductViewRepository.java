@@ -45,8 +45,8 @@ public interface SupplierProductViewRepository extends JpaRepository<SupplierPro
 
         @Query(value = "SELECT supplier_product_view.* "
                         + "FROM supplier_product_view "
-                        + "WHERE VendorSeqNo = :vendorSeqNo AND if(:isNotOrder = TRUE, NotOrderCnt > 0, NotOrderCnt = 0) "
+                        + "WHERE VendorSeqNo = :vendorSeqNo AND if(:type = 'notOrder', NotOrderCnt > 0, 1 = 1) AND if(:type = 'stock', NotOrderCnt > 0, 1 = 1) "
                         + "ORDER BY ProductSeqNo", nativeQuery = true)
         public List<SupplierProductViewEntity> queryOrderProduct(@Param("vendorSeqNo") Long vendorSeqNo,
-                        @Param("isNotOrder") boolean isNotOrder);
+                        @Param("type") String type);
 }

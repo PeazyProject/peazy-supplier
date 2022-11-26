@@ -42,11 +42,11 @@ public class PlaceOrderController {
     }
 
     @GetMapping(value = "/queryOrderProductList")
-    public ResponseEntity<QueryOrderProductResponse> queryOrderProductList(String vendorSeqNo, boolean isNotOrder)
+    public ResponseEntity<QueryOrderProductResponse> queryOrderProductList(String vendorSeqNo, String type)
             throws JsonProcessingException {
-        logger.info("VendorSeqNo : {}, isNotOrder = {}", vendorSeqNo, isNotOrder);
+        logger.info("queryOrderProductList vendorSeqNo : {}, type = {}", vendorSeqNo, type);
         QueryOrderProductResponse response = new QueryOrderProductResponse();
-        response.setOrderProductList(orderService.getOrderProductList(Long.valueOf(vendorSeqNo), isNotOrder));
+        response.setOrderProductList(orderService.getOrderProductList(Long.valueOf(vendorSeqNo), type));
         logger.info("response = {}", response);
         return ResponseEntity.ok(response);
     }
