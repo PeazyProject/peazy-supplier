@@ -30,4 +30,6 @@ public class SupplierProductViewEntity {
     private Long notOrderCnt;
     private Long vendorSeqNo;
     private String vendor;
+    private Long orderedCnt;
+    private Long checkOrderCnt;
 }
