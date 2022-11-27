@@ -1,5 +1,6 @@
 package com.peazy.supplier.model.entity;
 
+import java.math.BigDecimal;
 import java.util.Date;
 
 import javax.persistence.Column;
@@ -17,7 +18,9 @@ public class SupplierProductViewEntity {
     private Long productSeqNo;
     private String productName;
     private String snCode;
-    private String cost;
+    private BigDecimal cost;
+    private BigDecimal price;
+    private String productDesc;
     private String category;
     private String sku;
     private String color;

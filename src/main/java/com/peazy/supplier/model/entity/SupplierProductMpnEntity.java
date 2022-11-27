@@ -10,15 +10,15 @@ import javax.persistence.Table;
 import lombok.Data;
 
 @Entity
-@Table(name = "Supplier_ProductSize", schema = "alanlee")
+@Table(name = "Supplier_ProductMpn", schema = "alanlee")
 @Data
-public class SupplierProductSizeEntity {
+public class SupplierProductMpnEntity {
 
 	@Id	
 	@Column(name = "SeqNo", unique = true, nullable = false)
 	private long seqNo;
 	private long productSeqNo;
-	private String size;
+	private String mpn;
 	private String createUser;
 	private Date createDt;
 	private String updateUser;

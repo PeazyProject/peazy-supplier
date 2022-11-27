@@ -17,6 +17,7 @@ public class SupplierProductColorEntity {
 	@Id	
 	@Column(name = "SeqNo", unique = true, nullable = false)
 	private long seqNo;
+	private long productSeqNo;
 	private String color;
 	private String createUser;
 	private Date createDt;
