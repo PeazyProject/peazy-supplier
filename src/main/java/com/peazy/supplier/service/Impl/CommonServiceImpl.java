@@ -23,7 +23,7 @@ public class CommonServiceImpl implements CommonService {
 
         List<CommonCodeConverterEntity> commonCodeConverterEntities = 
             commonCodeConverterRepository.findByMainCategoryAndSubCategoryAndIsActivated(mainCategory, subCategory, "Y");
-// TEST
+
         List<DropDownBean> dropDownList = new ArrayList<>();
         for (CommonCodeConverterEntity entity : commonCodeConverterEntities) {
             DropDownBean dropDownBean = new DropDownBean();
