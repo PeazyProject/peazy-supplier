@@ -73,7 +73,7 @@ public class ProductController {
 	}
 
 	@GetMapping(value = "/queryProductBySeqNo/{seqNo}")
-	public ResponseEntity<QueryProductBySeqNoResponse> queryProductBySeqNo(@PathVariable String seqNo)
+	public ResponseEntity<QueryProductBySeqNoResponse> queryProductBySeqNo(@PathVariable Long seqNo)
 			throws JsonProcessingException {
 		logger.info("queryProductBySeqNo = {}", seqNo);
 		QueryProductBySeqNoResponse queryProductBySeqNoResponse = productService.queryProductBySeqNo(seqNo);

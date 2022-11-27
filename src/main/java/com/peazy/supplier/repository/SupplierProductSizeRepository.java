@@ -10,6 +10,4 @@ import com.peazy.supplier.model.entity.SupplierProductSizeEntity;
 @Repository
 public interface SupplierProductSizeRepository extends JpaRepository<SupplierProductSizeEntity, Long> {
 
-    List<SupplierProductSizeEntity> findByProductSeqNo(String productSeqNo);
-
 }

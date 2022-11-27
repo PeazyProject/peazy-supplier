@@ -88,7 +88,7 @@ public interface SupplierProductRepository extends JpaRepository<SupplierProduct
             + "     SUM(supplier_product_view.CheckOrderCnt) as ProductQty "
             + " FROM supplier_product_view "
             + " WHERE 1 = 1 "
-            + " AND (supplier_product_view.ProductSeqNo = :productSeqNo or NULLIF(:productSeqNo, '') is null) "
+            + " AND supplier_product_view.ProductSeqNo = :productSeqNo"
             + " GROUP BY "
             + " supplier_product_view.ProductSeqNo, "
             + " supplier_product_view.ProductName, "
@@ -102,6 +102,6 @@ public interface SupplierProductRepository extends JpaRepository<SupplierProduct
             + " supplier_product_view.CreateDt, "
             + " supplier_product_view.ProductStatus "
             + " ORDER BY supplier_product_view.CreateDt ", nativeQuery = true)
-    public List<GetProductBySeqNoDto> queryProductBySeqNo(@Param("productSeqNo") String productSeqNo);
+    public List<GetProductBySeqNoDto> queryProductBySeqNo(@Param("productSeqNo") Long productSeqNo);
 
 }

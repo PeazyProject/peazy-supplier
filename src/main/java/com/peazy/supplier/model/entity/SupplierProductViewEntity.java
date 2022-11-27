@@ -23,16 +23,21 @@ public class SupplierProductViewEntity {
     private String productDesc;
     private String category;
     private String sku;
+    private Long colorSeqNo;
     private String color;
     private Date createDt;
     private String productStatus;
+    private Long sizeSeqNo;
     private String size;
     @Id
     @Column(name = "PCSMSeqNo")
     private Long pcsmSeqNo;
-    private Long notOrderCnt;
     private Long vendorSeqNo;
     private String vendor;
-    private Long orderedCnt;
-    private Long checkOrderCnt;
+    private BigDecimal notOrderCnt;
+    private BigDecimal orderedCnt;
+    private BigDecimal checkOrderCnt;
+    private BigDecimal allocatedCnt;
+    private BigDecimal readyDeliveryCnt;
+    private BigDecimal finishCnt;
 }

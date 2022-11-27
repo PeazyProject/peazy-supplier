@@ -20,13 +20,13 @@ import com.peazy.supplier.model.dto.CheckOrderItemDto;
 import com.peazy.supplier.model.dto.GetProductByFilterDto;
 import com.peazy.supplier.model.dto.GetProductBySeqNoDto;
 import com.peazy.supplier.model.entity.CommonPictureEntity;
+import com.peazy.supplier.model.entity.SupplierMpnEntity;
 import com.peazy.supplier.model.entity.SupplierProductCategoryEntity;
 import com.peazy.supplier.model.entity.SupplierProductColorEntity;
-import com.peazy.supplier.model.entity.SupplierProductMpnEntity;
 import com.peazy.supplier.model.entity.SupplierProductPicEntity;
 import com.peazy.supplier.model.entity.SupplierProductSizeEntity;
-import com.peazy.supplier.model.entity.SupplierProductSkuEntity;
 import com.peazy.supplier.model.entity.SupplierProductViewEntity;
+import com.peazy.supplier.model.entity.SupplierSkuEntity;
 import com.peazy.supplier.model.request.QueryProductRequest;
 import com.peazy.supplier.model.response.QueryCheckOrderResponse;
 import com.peazy.supplier.model.response.QueryProductBySeqNoResponse;
@@ -182,7 +182,7 @@ public class ProductServiceImpl implements ProductService {
 	}
 
 	@Override
-	public QueryProductBySeqNoResponse queryProductBySeqNo(String productSeqNo) throws JsonProcessingException {
+	public QueryProductBySeqNoResponse queryProductBySeqNo(Long productSeqNo) throws JsonProcessingException {
 
 		List<GetProductBySeqNoDto> supplierProudctViewList = supplierProductRepository.queryProductBySeqNo(productSeqNo);
 
@@ -194,10 +194,8 @@ public class ProductServiceImpl implements ProductService {
 		QueryProductBySeqNoResponse queryProductBySeqNoResponse = new QueryProductBySeqNoResponse();
 		if (getProductBySeqNoDto != null) {
 			queryProductBySeqNoResponse.setProductName(getProductBySeqNoDto.getProductName());
-			queryProductBySeqNoResponse.setSizeList(getProductSizeByProductSeqNo(productSeqNo));
 			queryProductBySeqNoResponse.setMpnList(getProductMpnByProductSeqNo(productSeqNo));
 			queryProductBySeqNoResponse.setSkuList(getProductSkuByProductSeqNo(productSeqNo));
-			queryProductBySeqNoResponse.setColorList(getProductColorByProductSeqNo(productSeqNo));
 			queryProductBySeqNoResponse.setCost(getProductBySeqNoDto.getCost());
 			queryProductBySeqNoResponse.setPrice(getProductBySeqNoDto.getPrice());
 			queryProductBySeqNoResponse.setCategory(getProductBySeqNoDto.getCategory());
@@ -205,18 +203,13 @@ public class ProductServiceImpl implements ProductService {
 			queryProductBySeqNoResponse.setProductDesc(getProductBySeqNoDto.getProductDesc());
 			queryProductBySeqNoResponse.setMainPic(getProductBySeqNoDto.getSnCode());
 			queryProductBySeqNoResponse.setPicList(getProductPicByProductSeqNo(productSeqNo));
-
-			List<SupplierProductViewEntity> supplierProductViewEntities = supplierProductViewRepository.queryOrderProductBySeqNo(productSeqNo);
-
-			List<ProductColorSizeBean> productColorSizeList = new ArrayList<>();
-
-			if (!CollectionUtils.isEmpty(supplierProductViewEntities)) {
-				// TODO supplierProductViewEntities 要來做Map把Color跟Size分類成Header跟Detail
-			}
-			
-			queryProductBySeqNoResponse.setProductColorSizeList(productColorSizeList);
+			List<ProductColorSizeBean> productColorSizeBeans = getProductSizeColorByProductSeqNo(productSeqNo);
+			queryProductBySeqNoResponse.setProductColorSizeList(productColorSizeBeans);
+			List<Long> sizeList = productColorSizeBeans.stream().map(ProductColorSizeBean::getSizeSeqNo).collect(Collectors.toList());
+			List<Long> colorList = productColorSizeBeans.stream().map(ProductColorSizeBean::getSizeSeqNo).collect(Collectors.toList());
+			queryProductBySeqNoResponse.setSizeList(sizeList);
+			queryProductBySeqNoResponse.setColorList(colorList);
 		}
-	
 
 		return queryProductBySeqNoResponse;
 	}
@@ -236,29 +229,40 @@ public class ProductServiceImpl implements ProductService {
 
 		return response;
 	}
-
-	public List<Long> getProductSizeByProductSeqNo(String productSeqNo) {
-		List<SupplierProductSizeEntity> supplierProductSizeEntities = supplierProductSizeRepository.findByProductSeqNo(productSeqNo);
-		return supplierProductSizeEntities.stream().map(SupplierProductSizeEntity::getSeqNo).collect(Collectors.toList());
+	public List<Long> getProductMpnByProductSeqNo(Long productSeqNo) {
+		List<SupplierMpnEntity> supplierProductMpnEntities = supplierProductMpnRepository.findByProductSeqNo(productSeqNo);
+		return supplierProductMpnEntities.stream().map(SupplierMpnEntity::getSeqNo).collect(Collectors.toList());
 	}
 
-	public List<Long> getProductMpnByProductSeqNo(String productSeqNo) {
-		List<SupplierProductMpnEntity> supplierProductMpnEntities = supplierProductMpnRepository.findByProductSeqNo(productSeqNo);
-		return supplierProductMpnEntities.stream().map(SupplierProductMpnEntity::getSeqNo).collect(Collectors.toList());
+	public List<Long> getProductSkuByProductSeqNo(Long productSeqNo) {
+		List<SupplierSkuEntity> supplierProductSkuEntities = supplierProductSkuRepository.findByProductSeqNo(productSeqNo);
+		return supplierProductSkuEntities.stream().map(SupplierSkuEntity::getSeqNo).collect(Collectors.toList());
 	}
 
-	public List<Long> getProductSkuByProductSeqNo(String productSeqNo) {
-		List<SupplierProductSkuEntity> supplierProductSkuEntities = supplierProductSkuRepository.findByProductSeqNo(productSeqNo);
-		return supplierProductSkuEntities.stream().map(SupplierProductSkuEntity::getSeqNo).collect(Collectors.toList());
-	}
-
-	public List<Long> getProductColorByProductSeqNo(String productSeqNo) {
-		List<SupplierProductColorEntity> supplierProductColorEntities = supplierProductColorRepository.findByProductSeqNo(productSeqNo);
-		return supplierProductColorEntities.stream().map(SupplierProductColorEntity::getSeqNo).collect(Collectors.toList());
-	}
-
-	public List<String> getProductPicByProductSeqNo(String productSeqNo) {
+	public List<String> getProductPicByProductSeqNo(Long productSeqNo) {
 		List<SupplierProductPicEntity> supplierProductPicEntities = SupplierProductPicRepository.findByProductSeqNo(productSeqNo);
 		return supplierProductPicEntities.stream().map(SupplierProductPicEntity::getSnCode).collect(Collectors.toList());
+	}
+
+	public List<ProductColorSizeBean> getProductSizeColorByProductSeqNo(Long productSeqNo) {
+		List<SupplierProductViewEntity> supplierProductViewEntities = supplierProductViewRepository.queryOrderProductBySeqNo(productSeqNo);
+
+		List<ProductColorSizeBean> productColorSizeList = new ArrayList<>();
+
+		if (!CollectionUtils.isEmpty(supplierProductViewEntities)) {
+			for (SupplierProductViewEntity supplierProductViewEntity : supplierProductViewEntities) {
+				ProductColorSizeBean productColorSizeBean = new ProductColorSizeBean();
+				productColorSizeBean.setSizeSeqNo(supplierProductViewEntity.getSizeSeqNo());
+				productColorSizeBean.setColorSeqNo(supplierProductViewEntity.getColorSeqNo());
+				productColorSizeBean.setNotOrderCnt(supplierProductViewEntity.getNotOrderCnt());
+				productColorSizeBean.setOrderedCnt(supplierProductViewEntity.getOrderedCnt());
+				productColorSizeBean.setCheckOrderCnt(supplierProductViewEntity.getCheckOrderCnt());
+				productColorSizeBean.setAllocatedCnt(supplierProductViewEntity.getAllocatedCnt());
+				productColorSizeBean.setReadyDeliveryCnt(supplierProductViewEntity.getReadyDeliveryCnt());
+				productColorSizeBean.setFinishCnt(supplierProductViewEntity.getFinishCnt());
+				productColorSizeList.add(productColorSizeBean);
+			}
+		}
+		return productColorSizeList;
 	}
 }

@@ -5,11 +5,11 @@ import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import com.peazy.supplier.model.entity.SupplierProductMpnEntity;
+import com.peazy.supplier.model.entity.SupplierMpnEntity;
 
 @Repository
-public interface SupplierProductMpnRepository extends JpaRepository<SupplierProductMpnEntity, Long> {
+public interface SupplierProductMpnRepository extends JpaRepository<SupplierMpnEntity, Long> {
 
-    List<SupplierProductMpnEntity> findByProductSeqNo(String productSeqNo);
+    List<SupplierMpnEntity> findByProductSeqNo(Long productSeqNo);
 
 }

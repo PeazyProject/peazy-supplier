@@ -53,5 +53,5 @@ public interface SupplierProductViewRepository extends JpaRepository<SupplierPro
         @Query(value = "SELECT supplier_product_view.* "
                         + "FROM supplier_product_view "
                         + "WHERE ProductSeqNo = :ProductSeqNo ", nativeQuery = true)
-        public List<SupplierProductViewEntity> queryOrderProductBySeqNo(@Param("ProductSeqNo") String ProductSeqNo);
+        public List<SupplierProductViewEntity> queryOrderProductBySeqNo(@Param("ProductSeqNo") Long ProductSeqNo);
 }

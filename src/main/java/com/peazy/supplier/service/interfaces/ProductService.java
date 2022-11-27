@@ -20,7 +20,7 @@ public interface ProductService {
 
 	List<String> getProductCategoryOption() throws JsonProcessingException;
 
-	QueryProductBySeqNoResponse queryProductBySeqNo(String seqNo) throws JsonProcessingException;
+	QueryProductBySeqNoResponse queryProductBySeqNo(Long seqNo) throws JsonProcessingException;
 
 	QueryCheckOrderResponse queryCheckOrder() throws JsonProcessingException;
 }

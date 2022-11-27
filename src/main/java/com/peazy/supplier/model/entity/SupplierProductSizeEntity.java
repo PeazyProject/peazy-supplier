@@ -17,7 +17,6 @@ public class SupplierProductSizeEntity {
 	@Id	
 	@Column(name = "SeqNo", unique = true, nullable = false)
 	private long seqNo;
-	private long productSeqNo;
 	private String size;
 	private String createUser;
 	private Date createDt;

@@ -10,6 +10,4 @@ import com.peazy.supplier.model.entity.SupplierProductColorEntity;
 @Repository
 public interface SupplierProductColorRepository extends JpaRepository<SupplierProductColorEntity, Long> {
 
-    List<SupplierProductColorEntity> findByProductSeqNo(String productSeqNo);
-
 }
