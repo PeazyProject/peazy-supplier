@@ -62,6 +62,9 @@ public interface SupplierProductRepository extends JpaRepository<SupplierProduct
                     "supplier_product_view.ProductStatus, " +
                     "SUM(supplier_product_view.OrderedCnt) AS ProductOrderedCnt " +
                     "FROM supplier_product_view " +
+                    " WHERE 1 = 1 " +
+                    " AND (supplier_product_view.ProductName LIKE CONCAT('%' ,:productName ,'%') or NULLIF(:productName, '') is null) " +
+                    " AND (supplier_product_view.Sku LIKE CONCAT('%' ,:sku ,'%') or NULLIF(:sku, '') is null) " +
                     "GROUP BY  " +
                     "supplier_product_view.ProductSeqNo, " +
                     "supplier_product_view.ProductName, " +
@@ -71,7 +74,8 @@ public interface SupplierProductRepository extends JpaRepository<SupplierProduct
                     "supplier_product_view.Sku, " +
                     "supplier_product_view.CreateDt, " +
                     "supplier_product_view.ProductStatus ", nativeQuery = true)
-    public List<CheckOrderItemDto> queryCheckOrder();
+    public List<CheckOrderItemDto> queryCheckOrder(@Param("productName") String productName,
+                    @Param("sku") String sku);
 
     @Query(value = "SELECT DISTINCT "
             + "     supplier_product_view.ProductSeqNo, "
