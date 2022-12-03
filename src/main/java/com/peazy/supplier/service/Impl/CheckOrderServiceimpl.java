@@ -10,11 +10,12 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.peazy.supplier.model.bean.QueryCheckOrderBean;
 import com.peazy.supplier.model.dto.CheckOrderItemDto;
-import com.peazy.supplier.model.entity.SupplierProductColorSizeMappingEntity;
+import com.peazy.supplier.model.entity.SupplierProductViewEntity;
 import com.peazy.supplier.model.response.QueryCheckOrderItemResponse;
 import com.peazy.supplier.model.response.QueryCheckOrderResponse;
 import com.peazy.supplier.repository.SupplierProductColorSizeMappingRepository;
 import com.peazy.supplier.repository.SupplierProductRepository;
+import com.peazy.supplier.repository.SupplierProductViewRepository;
 import com.peazy.supplier.service.interfaces.CheckOrderService;
 
 @Service
@@ -24,7 +25,7 @@ public class CheckOrderServiceimpl implements CheckOrderService {
     private SupplierProductRepository supplierProductRepository;
 
     @Autowired
-    private SupplierProductColorSizeMappingRepository supplierProductColorSizeMappingRepository;
+    private SupplierProductViewRepository supplierProductViewRepository;
 
     @Override
     public QueryCheckOrderResponse queryCheckOrder() throws JsonProcessingException {
@@ -44,11 +45,10 @@ public class CheckOrderServiceimpl implements CheckOrderService {
 
     @Override
     public QueryCheckOrderItemResponse queryCheckOrderItem(Long seqNo) {
-        List<SupplierProductColorSizeMappingEntity> queryCheckOrderItemList = supplierProductColorSizeMappingRepository
-                .findByProductSeqNo(
-                        seqNo);
+        List<SupplierProductViewEntity> queryCheckOrderItemList = supplierProductViewRepository
+                .queryOrderProductBySeqNo(seqNo);
         QueryCheckOrderItemResponse response = new QueryCheckOrderItemResponse();
-        response.setQueryCheckOrderItemBeanList(queryCheckOrderItemList);
+        response.setSupplierProductViewList(queryCheckOrderItemList);
         return response;
     }
 }
