@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.peazy.supplier.model.bean.BlobDocumentBean;
 import com.peazy.supplier.model.request.QueryProductRequest;
-import com.peazy.supplier.model.response.QueryCheckOrderResponse;
 import com.peazy.supplier.model.response.QueryProductBySeqNoResponse;
 import com.peazy.supplier.model.response.QueryProductResponse;
 import com.peazy.supplier.service.interfaces.ProductService;
@@ -79,13 +78,5 @@ public class ProductController {
 		QueryProductBySeqNoResponse queryProductBySeqNoResponse = productService.queryProductBySeqNo(seqNo);
 		logger.info("queryProductBySeqNoResponse = {}", queryProductBySeqNoResponse);
 		return ResponseEntity.ok(queryProductBySeqNoResponse);
-	}
-
-	@PostMapping(value = "/queryCheckOrderItem")
-	public ResponseEntity<QueryCheckOrderResponse> queryCheckOrderItem() throws JsonProcessingException {
-		logger.info("queryCheckOrderItem = ");
-		QueryCheckOrderResponse queryCheckOrderItemResponse = productService.queryCheckOrder();
-		logger.info("queryCheckOrderItem = ");
-		return ResponseEntity.ok(queryCheckOrderItemResponse);
 	}
 }

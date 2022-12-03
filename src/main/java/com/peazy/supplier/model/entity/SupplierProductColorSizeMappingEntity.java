@@ -10,23 +10,27 @@ import javax.persistence.Table;
 import lombok.Data;
 
 @Entity
-@Table(name = "supplier_ProductColorSizeMapping", schema = "alanlee")
+@Table(name = "Supplier_ProductColorSizeMapping", schema = "alanlee")
 @Data
 public class SupplierProductColorSizeMappingEntity {
     @Id
     @Column(name = "SeqNo", unique = true, nullable = false)
     private long seqNo;
-    private long ProductSeqNo;
-    private long ColorSeqNo;
-    private long SizeSeqNo;
-    private String NotOrderCnt;
-    private String OrderedCnt;
-    private String CheckOrderCnt;
-    private String AllocatedCnt;
-    private String ReadyDeliveryCnt;
-    private String FinishCnt;
-    private String CreateUser;
-    private Date CreateDt;
-    private String UpdateUser;
-    private Date UpdateDt;
+
+    @Column(name = "ProductSeqNo")
+    private long productSeqNo;
+    @Column(name = "ColorSeqNo")
+    private long colorSeqNo;
+    @Column(name = "SizeSeqNo")
+    private long sizeSeqNo;
+    private String notOrderCnt;
+    private String orderedCnt;
+    private String checkOrderCnt;
+    private String allocatedCnt;
+    private String readyDeliveryCnt;
+    private String finishCnt;
+    private String createUser;
+    private Date createDt;
+    private String updateUser;
+    private Date updateDt;
 }

@@ -5,8 +5,8 @@ import java.util.Date;
 import lombok.Data;
 
 @Data
-public class QueryCheckOrderItemBean {
-    private String SeqNo;
+public class QueryCheckOrderBean {
+    private String productSeqNo;
     private String productName;
     private String snCode;
     private String cost;

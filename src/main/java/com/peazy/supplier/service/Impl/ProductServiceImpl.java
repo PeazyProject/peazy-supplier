@@ -14,7 +14,7 @@ import org.springframework.util.CollectionUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.peazy.supplier.model.bean.BlobDocumentBean;
 import com.peazy.supplier.model.bean.ProductColorSizeBean;
-import com.peazy.supplier.model.bean.QueryCheckOrderItemBean;
+import com.peazy.supplier.model.bean.QueryCheckOrderBean;
 import com.peazy.supplier.model.bean.QueryProductBean;
 import com.peazy.supplier.model.dto.CheckOrderItemDto;
 import com.peazy.supplier.model.dto.GetProductByFilterDto;
@@ -23,17 +23,20 @@ import com.peazy.supplier.model.entity.CommonPictureEntity;
 import com.peazy.supplier.model.entity.SupplierMpnEntity;
 import com.peazy.supplier.model.entity.SupplierProductCategoryEntity;
 import com.peazy.supplier.model.entity.SupplierProductColorEntity;
+import com.peazy.supplier.model.entity.SupplierProductColorSizeMappingEntity;
 import com.peazy.supplier.model.entity.SupplierProductPicEntity;
 import com.peazy.supplier.model.entity.SupplierProductSizeEntity;
 import com.peazy.supplier.model.entity.SupplierProductViewEntity;
 import com.peazy.supplier.model.entity.SupplierSkuEntity;
 import com.peazy.supplier.model.request.QueryProductRequest;
+import com.peazy.supplier.model.response.QueryCheckOrderItemResponse;
 import com.peazy.supplier.model.response.QueryCheckOrderResponse;
 import com.peazy.supplier.model.response.QueryProductBySeqNoResponse;
 import com.peazy.supplier.model.response.QueryProductResponse;
 import com.peazy.supplier.repository.CommonPictureRepository;
 import com.peazy.supplier.repository.SupplierProductCategoryRepository;
 import com.peazy.supplier.repository.SupplierProductColorRepository;
+import com.peazy.supplier.repository.SupplierProductColorSizeMappingRepository;
 import com.peazy.supplier.repository.SupplierProductMpnRepository;
 import com.peazy.supplier.repository.SupplierProductRepository;
 import com.peazy.supplier.repository.SupplierProductSizeRepository;
@@ -41,7 +44,6 @@ import com.peazy.supplier.repository.SupplierProductSkuRepository;
 import com.peazy.supplier.repository.SupplierProductViewRepository;
 import com.peazy.supplier.repository.SupplierProductPicRepository;
 import com.peazy.supplier.service.interfaces.ProductService;
-
 
 @Service
 public class ProductServiceImpl implements ProductService {
@@ -85,8 +87,9 @@ public class ProductServiceImpl implements ProductService {
 		}
 
 		List<GetProductByFilterDto> supplierProductEntity = supplierProductRepository.queryProduct(
-			queryProductRequest.getProductName(), queryProductRequest.getSkuList(), queryProductRequest.getIsAvailable());
-		
+				queryProductRequest.getProductName(), queryProductRequest.getSkuList(),
+				queryProductRequest.getIsAvailable());
+
 		List<QueryProductBean> queryProductList = new ArrayList<>();
 		for (GetProductByFilterDto getProductByFilterDto : supplierProductEntity) {
 			QueryProductBean queryProductBean = new QueryProductBean();
@@ -100,11 +103,10 @@ public class ProductServiceImpl implements ProductService {
 			queryProductBean.setProductStatus(getProductByFilterDto.getProductStatus());
 			queryProductBean.setProductQty(getProductByFilterDto.getProductQty());
 
-			if (isProductInStock(queryProductRequest.getInStockList(), 
-				queryProductBean.getProductQty(), getProductByFilterDto.getProductStatus())) {
+			if (isProductInStock(queryProductRequest.getInStockList(),
+					queryProductBean.getProductQty(), getProductByFilterDto.getProductStatus())) {
 				queryProductList.add(queryProductBean);
 			}
-			
 
 		}
 
@@ -114,7 +116,6 @@ public class ProductServiceImpl implements ProductService {
 	}
 
 	private boolean isProductInStock(List<String> inStockList, int productQty, String productStatus) {
-
 
 		if (CollectionUtils.isEmpty(inStockList)) {
 			return true;
@@ -140,7 +141,8 @@ public class ProductServiceImpl implements ProductService {
 		Optional<CommonPictureEntity> commonPicOptional = commonPictureRepository.findById(snCode);
 		if (commonPicOptional.isPresent()) {
 			BlobDocumentBean blobDocumentBean = new BlobDocumentBean();
-			blobDocumentBean.setName(commonPicOptional.get().getPictureName() + commonPicOptional.get().getPictureExtension());
+			blobDocumentBean
+					.setName(commonPicOptional.get().getPictureName() + commonPicOptional.get().getPictureExtension());
 			blobDocumentBean.setContent(commonPicOptional.get().getPicture());
 			return blobDocumentBean;
 		}
@@ -184,7 +186,8 @@ public class ProductServiceImpl implements ProductService {
 	@Override
 	public QueryProductBySeqNoResponse queryProductBySeqNo(Long productSeqNo) throws JsonProcessingException {
 
-		List<GetProductBySeqNoDto> supplierProudctViewList = supplierProductRepository.queryProductBySeqNo(productSeqNo);
+		List<GetProductBySeqNoDto> supplierProudctViewList = supplierProductRepository
+				.queryProductBySeqNo(productSeqNo);
 
 		GetProductBySeqNoDto getProductBySeqNoDto = null;
 		if (supplierProudctViewList.size() > 0) {
@@ -205,8 +208,10 @@ public class ProductServiceImpl implements ProductService {
 			queryProductBySeqNoResponse.setPicList(getProductPicByProductSeqNo(productSeqNo));
 			List<ProductColorSizeBean> productColorSizeBeans = getProductSizeColorByProductSeqNo(productSeqNo);
 			queryProductBySeqNoResponse.setProductColorSizeList(productColorSizeBeans);
-			List<Long> sizeList = productColorSizeBeans.stream().map(ProductColorSizeBean::getSizeSeqNo).collect(Collectors.toList());
-			List<Long> colorList = productColorSizeBeans.stream().map(ProductColorSizeBean::getSizeSeqNo).collect(Collectors.toList());
+			List<Long> sizeList = productColorSizeBeans.stream().map(ProductColorSizeBean::getSizeSeqNo)
+					.collect(Collectors.toList());
+			List<Long> colorList = productColorSizeBeans.stream().map(ProductColorSizeBean::getSizeSeqNo)
+					.collect(Collectors.toList());
 			queryProductBySeqNoResponse.setSizeList(sizeList);
 			queryProductBySeqNoResponse.setColorList(colorList);
 		}
@@ -214,38 +219,28 @@ public class ProductServiceImpl implements ProductService {
 		return queryProductBySeqNoResponse;
 	}
 
-	@Override
-	public QueryCheckOrderResponse queryCheckOrder() throws JsonProcessingException {
-		QueryCheckOrderResponse response = new QueryCheckOrderResponse();
-		List<CheckOrderItemDto> checkOrderItemDtos = supplierProductRepository.queryCheckOrder();
-		List<QueryCheckOrderItemBean> queryCheckOrderItemBeanList = new ArrayList<>();
-
-		for (CheckOrderItemDto checkOrderItemDto : checkOrderItemDtos) {
-			QueryCheckOrderItemBean queryCheckOrderItemBean = new QueryCheckOrderItemBean();
-			BeanUtils.copyProperties(checkOrderItemDto, queryCheckOrderItemBean);
-			queryCheckOrderItemBeanList.add(queryCheckOrderItemBean);
-		}
-		response.setQueryCheckOrderItemBeanList(queryCheckOrderItemBeanList);
-
-		return response;
-	}
 	public List<Long> getProductMpnByProductSeqNo(Long productSeqNo) {
-		List<SupplierMpnEntity> supplierProductMpnEntities = supplierProductMpnRepository.findByProductSeqNo(productSeqNo);
+		List<SupplierMpnEntity> supplierProductMpnEntities = supplierProductMpnRepository
+				.findByProductSeqNo(productSeqNo);
 		return supplierProductMpnEntities.stream().map(SupplierMpnEntity::getSeqNo).collect(Collectors.toList());
 	}
 
 	public List<Long> getProductSkuByProductSeqNo(Long productSeqNo) {
-		List<SupplierSkuEntity> supplierProductSkuEntities = supplierProductSkuRepository.findByProductSeqNo(productSeqNo);
+		List<SupplierSkuEntity> supplierProductSkuEntities = supplierProductSkuRepository
+				.findByProductSeqNo(productSeqNo);
 		return supplierProductSkuEntities.stream().map(SupplierSkuEntity::getSeqNo).collect(Collectors.toList());
 	}
 
 	public List<String> getProductPicByProductSeqNo(Long productSeqNo) {
-		List<SupplierProductPicEntity> supplierProductPicEntities = SupplierProductPicRepository.findByProductSeqNo(productSeqNo);
-		return supplierProductPicEntities.stream().map(SupplierProductPicEntity::getSnCode).collect(Collectors.toList());
+		List<SupplierProductPicEntity> supplierProductPicEntities = SupplierProductPicRepository
+				.findByProductSeqNo(productSeqNo);
+		return supplierProductPicEntities.stream().map(SupplierProductPicEntity::getSnCode)
+				.collect(Collectors.toList());
 	}
 
 	public List<ProductColorSizeBean> getProductSizeColorByProductSeqNo(Long productSeqNo) {
-		List<SupplierProductViewEntity> supplierProductViewEntities = supplierProductViewRepository.queryOrderProductBySeqNo(productSeqNo);
+		List<SupplierProductViewEntity> supplierProductViewEntities = supplierProductViewRepository
+				.queryOrderProductBySeqNo(productSeqNo);
 
 		List<ProductColorSizeBean> productColorSizeList = new ArrayList<>();
 
@@ -265,4 +260,5 @@ public class ProductServiceImpl implements ProductService {
 		}
 		return productColorSizeList;
 	}
+
 }
