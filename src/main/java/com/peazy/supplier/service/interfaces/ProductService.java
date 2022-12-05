@@ -4,8 +4,9 @@ import java.util.List;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.peazy.supplier.model.bean.BlobDocumentBean;
+import com.peazy.supplier.model.bean.DropDownBean;
 import com.peazy.supplier.model.request.QueryProductRequest;
-import com.peazy.supplier.model.response.QueryProductBySeqNoResponse;
+import com.peazy.supplier.model.response.QueryProductBySeqNoParam;
 import com.peazy.supplier.model.response.QueryProductResponse;
 
 public interface ProductService {
@@ -13,11 +14,13 @@ public interface ProductService {
 
 	BlobDocumentBean getImgUrl(String snCode) throws JsonProcessingException;
 
-	List<String> getProductSizeOption() throws JsonProcessingException;
+	List<DropDownBean> getProductSizeOption() throws JsonProcessingException;
 
-	List<String> getProductColorOption() throws JsonProcessingException;
+	List<DropDownBean> getProductColorOption() throws JsonProcessingException;
 
-	List<String> getProductCategoryOption() throws JsonProcessingException;
+	List<DropDownBean> getProductCategoryOption() throws JsonProcessingException;
 
-	QueryProductBySeqNoResponse queryProductBySeqNo(Long seqNo) throws JsonProcessingException;
+	QueryProductBySeqNoParam queryProductBySeqNo(Long seqNo) throws JsonProcessingException;
+
+	QueryProductResponse editProduct(QueryProductBySeqNoParam queryProductBySeqNoParam);
 }

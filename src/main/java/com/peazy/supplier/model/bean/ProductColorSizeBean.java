@@ -6,8 +6,8 @@ import lombok.Data;
 
 @Data
 public class ProductColorSizeBean {
-    Long colorSeqNo;
-    Long sizeSeqNo;
+    String colorSeqNo;
+    String sizeSeqNo;
     BigDecimal notOrderCnt;
     BigDecimal orderedCnt;
     BigDecimal checkOrderCnt;

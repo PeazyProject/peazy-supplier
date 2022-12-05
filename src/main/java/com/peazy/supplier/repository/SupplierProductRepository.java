@@ -83,7 +83,7 @@ public interface SupplierProductRepository extends JpaRepository<SupplierProduct
             + "     supplier_product_view.SnCode, "
             + "     supplier_product_view.Price, "
             + "     supplier_product_view.Cost, "
-            + "     supplier_product_view.Category, "
+            + "     supplier_product_view.CategorySeqNo, "
             + "     supplier_product_view.Mpn, "
             + "     supplier_product_view.Sku, "
             + "     supplier_product_view.ProductDesc, "

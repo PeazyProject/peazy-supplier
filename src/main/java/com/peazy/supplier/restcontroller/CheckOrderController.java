@@ -41,9 +41,9 @@ public class CheckOrderController {
     public ResponseEntity<QueryCheckOrderItemResponse> queryCheckOrderItemBySeqNo(@PathVariable Long seqNo)
             throws JsonProcessingException {
         log.info("queryCheckOrderItemBySeqNo req= {}", seqNo);
-        QueryCheckOrderItemResponse queryProductBySeqNoResponse = checkOrderService.queryCheckOrderItem(seqNo);
-        log.info("queryCheckOrderItemBySeqNo resp= {}", queryProductBySeqNoResponse);
-        return ResponseEntity.ok(queryProductBySeqNoResponse);
+        QueryCheckOrderItemResponse QueryProductBySeqNoParam = checkOrderService.queryCheckOrderItem(seqNo);
+        log.info("queryCheckOrderItemBySeqNo resp= {}", QueryProductBySeqNoParam);
+        return ResponseEntity.ok(QueryProductBySeqNoParam);
     }
 
     @PostMapping(value = "/queryCheckOrder")

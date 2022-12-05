@@ -18,8 +18,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.peazy.supplier.model.bean.BlobDocumentBean;
+import com.peazy.supplier.model.bean.DropDownBean;
 import com.peazy.supplier.model.request.QueryProductRequest;
-import com.peazy.supplier.model.response.QueryProductBySeqNoResponse;
+import com.peazy.supplier.model.response.QueryProductBySeqNoParam;
 import com.peazy.supplier.model.response.QueryProductResponse;
 import com.peazy.supplier.service.interfaces.ProductService;
 
@@ -51,32 +52,40 @@ public class ProductController {
 	}
 
 	@GetMapping(value = "/getProductSizeOption")
-	public ResponseEntity<List<String>> getProductSizeOption() throws JsonProcessingException {
+	public ResponseEntity<List<DropDownBean>> getProductSizeOption() throws JsonProcessingException {
 
-		List<String> result = productService.getProductSizeOption();
+		List<DropDownBean> result = productService.getProductSizeOption();
 		return ResponseEntity.ok(result);
 	}
 
 	@GetMapping(value = "/getProductColorOption")
-	public ResponseEntity<List<String>> getProductColorOption() throws JsonProcessingException {
+	public ResponseEntity<List<DropDownBean>> getProductColorOption() throws JsonProcessingException {
 
-		List<String> result = productService.getProductColorOption();
+		List<DropDownBean> result = productService.getProductColorOption();
 		return ResponseEntity.ok(result);
 	}
 
 	@GetMapping(value = "/getProductCategoryOption")
-	public ResponseEntity<List<String>> getProductCategoryOption() throws JsonProcessingException {
+	public ResponseEntity<List<DropDownBean>> getProductCategoryOption() throws JsonProcessingException {
 
-		List<String> result = productService.getProductCategoryOption();
+		List<DropDownBean> result = productService.getProductCategoryOption();
 		return ResponseEntity.ok(result);
 	}
 
 	@GetMapping(value = "/queryProductBySeqNo/{seqNo}")
-	public ResponseEntity<QueryProductBySeqNoResponse> queryProductBySeqNo(@PathVariable Long seqNo)
+	public ResponseEntity<QueryProductBySeqNoParam> queryProductBySeqNo(@PathVariable Long seqNo)
 			throws JsonProcessingException {
 		logger.info("queryProductBySeqNo = {}", seqNo);
-		QueryProductBySeqNoResponse queryProductBySeqNoResponse = productService.queryProductBySeqNo(seqNo);
-		logger.info("queryProductBySeqNoResponse = {}", queryProductBySeqNoResponse);
-		return ResponseEntity.ok(queryProductBySeqNoResponse);
+		QueryProductBySeqNoParam queryProductBySeqNoParam = productService.queryProductBySeqNo(seqNo);
+		logger.info("queryProductBySeqNoParam = {}", queryProductBySeqNoParam);
+		return ResponseEntity.ok(queryProductBySeqNoParam);
+	}
+
+	@PostMapping(value = "/editProduct")
+	public ResponseEntity<Void> editProduct(@RequestBody QueryProductBySeqNoParam queryProductBySeqNoParam)
+			throws JsonProcessingException {
+		logger.info("editProduct request = {}", queryProductBySeqNoParam);
+		productService.editProduct(queryProductBySeqNoParam);
+		return ResponseEntity.ok(null);
 	}
 }

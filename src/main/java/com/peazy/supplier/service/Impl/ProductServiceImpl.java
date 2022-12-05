@@ -6,37 +6,31 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.peazy.supplier.model.bean.BlobDocumentBean;
+import com.peazy.supplier.model.bean.DropDownBean;
 import com.peazy.supplier.model.bean.ProductColorSizeBean;
-import com.peazy.supplier.model.bean.QueryCheckOrderBean;
 import com.peazy.supplier.model.bean.QueryProductBean;
-import com.peazy.supplier.model.dto.CheckOrderItemDto;
 import com.peazy.supplier.model.dto.GetProductByFilterDto;
 import com.peazy.supplier.model.dto.GetProductBySeqNoDto;
 import com.peazy.supplier.model.entity.CommonPictureEntity;
 import com.peazy.supplier.model.entity.SupplierMpnEntity;
 import com.peazy.supplier.model.entity.SupplierProductCategoryEntity;
 import com.peazy.supplier.model.entity.SupplierProductColorEntity;
-import com.peazy.supplier.model.entity.SupplierProductColorSizeMappingEntity;
 import com.peazy.supplier.model.entity.SupplierProductPicEntity;
 import com.peazy.supplier.model.entity.SupplierProductSizeEntity;
 import com.peazy.supplier.model.entity.SupplierProductViewEntity;
 import com.peazy.supplier.model.entity.SupplierSkuEntity;
 import com.peazy.supplier.model.request.QueryProductRequest;
-import com.peazy.supplier.model.response.QueryCheckOrderItemResponse;
-import com.peazy.supplier.model.response.QueryCheckOrderResponse;
-import com.peazy.supplier.model.response.QueryProductBySeqNoResponse;
+import com.peazy.supplier.model.response.QueryProductBySeqNoParam;
 import com.peazy.supplier.model.response.QueryProductResponse;
 import com.peazy.supplier.repository.CommonPictureRepository;
 import com.peazy.supplier.repository.SupplierProductCategoryRepository;
 import com.peazy.supplier.repository.SupplierProductColorRepository;
-import com.peazy.supplier.repository.SupplierProductColorSizeMappingRepository;
 import com.peazy.supplier.repository.SupplierProductMpnRepository;
 import com.peazy.supplier.repository.SupplierProductRepository;
 import com.peazy.supplier.repository.SupplierProductSizeRepository;
@@ -150,41 +144,51 @@ public class ProductServiceImpl implements ProductService {
 	}
 
 	@Override
-	public List<String> getProductSizeOption() throws JsonProcessingException {
+	public List<DropDownBean> getProductSizeOption() throws JsonProcessingException {
 		List<SupplierProductSizeEntity> sizeEntities = supplierProductSizeRepository.findAll();
 
-		List<String> sizeList = new ArrayList<>();
+		List<DropDownBean> sizeList = new ArrayList<>();
 		for (SupplierProductSizeEntity entity : sizeEntities) {
-			sizeList.add(entity.getSize());
+			DropDownBean dropDownBean = new DropDownBean();
+			dropDownBean.setValue(String.valueOf(entity.getSeqNo()));
+			dropDownBean.setLabel(entity.getSize());
+			sizeList.add(dropDownBean);
 		}
 		return sizeList;
 	}
 
 	@Override
-	public List<String> getProductColorOption() throws JsonProcessingException {
+	public List<DropDownBean> getProductColorOption() throws JsonProcessingException {
 		List<SupplierProductColorEntity> colorEntities = supplierProductColorRepository.findAll();
 
-		List<String> colorList = new ArrayList<>();
+		List<DropDownBean> colorList = new ArrayList<>();
 		for (SupplierProductColorEntity entity : colorEntities) {
-			colorList.add(entity.getColor());
+			DropDownBean dropDownBean = new DropDownBean();
+			dropDownBean.setValue(String.valueOf(entity.getSeqNo()));
+			dropDownBean.setLabel(entity.getColor());
+			colorList.add(dropDownBean);
 		}
+		
 		return colorList;
 	}
 
 	@Override
-	public List<String> getProductCategoryOption() throws JsonProcessingException {
+	public List<DropDownBean> getProductCategoryOption() throws JsonProcessingException {
 
 		List<SupplierProductCategoryEntity> categoryEntities = supplierProductCategoryRepository.findAll();
 
-		List<String> categoryList = new ArrayList<>();
+		List<DropDownBean> categoryList = new ArrayList<>();
 		for (SupplierProductCategoryEntity entity : categoryEntities) {
-			categoryList.add(entity.getCategory());
+			DropDownBean dropDownBean = new DropDownBean();
+			dropDownBean.setValue(String.valueOf(entity.getSeqNo()));
+			dropDownBean.setLabel(entity.getCategory());
+			categoryList.add(dropDownBean);
 		}
 		return categoryList;
 	}
 
 	@Override
-	public QueryProductBySeqNoResponse queryProductBySeqNo(Long productSeqNo) throws JsonProcessingException {
+	public QueryProductBySeqNoParam queryProductBySeqNo(Long productSeqNo) throws JsonProcessingException {
 
 		List<GetProductBySeqNoDto> supplierProudctViewList = supplierProductRepository
 				.queryProductBySeqNo(productSeqNo);
@@ -194,29 +198,29 @@ public class ProductServiceImpl implements ProductService {
 			getProductBySeqNoDto = supplierProudctViewList.get(0);
 		}
 
-		QueryProductBySeqNoResponse queryProductBySeqNoResponse = new QueryProductBySeqNoResponse();
+		QueryProductBySeqNoParam queryProductBySeqNoParam = new QueryProductBySeqNoParam();
 		if (getProductBySeqNoDto != null) {
-			queryProductBySeqNoResponse.setProductName(getProductBySeqNoDto.getProductName());
-			queryProductBySeqNoResponse.setMpnList(getProductMpnByProductSeqNo(productSeqNo));
-			queryProductBySeqNoResponse.setSkuList(getProductSkuByProductSeqNo(productSeqNo));
-			queryProductBySeqNoResponse.setCost(getProductBySeqNoDto.getCost());
-			queryProductBySeqNoResponse.setPrice(getProductBySeqNoDto.getPrice());
-			queryProductBySeqNoResponse.setCategory(getProductBySeqNoDto.getCategory());
-			queryProductBySeqNoResponse.setProductStatus(getProductBySeqNoDto.getProductStatus());
-			queryProductBySeqNoResponse.setProductDesc(getProductBySeqNoDto.getProductDesc());
-			queryProductBySeqNoResponse.setMainPic(getProductBySeqNoDto.getSnCode());
-			queryProductBySeqNoResponse.setPicList(getProductPicByProductSeqNo(productSeqNo));
+			queryProductBySeqNoParam.setProductName(getProductBySeqNoDto.getProductName());
+			queryProductBySeqNoParam.setMpnList(getProductMpnByProductSeqNo(productSeqNo));
+			queryProductBySeqNoParam.setSkuList(getProductSkuByProductSeqNo(productSeqNo));
+			queryProductBySeqNoParam.setCost(getProductBySeqNoDto.getCost());
+			queryProductBySeqNoParam.setPrice(getProductBySeqNoDto.getPrice());
+			queryProductBySeqNoParam.setCategory(getProductBySeqNoDto.getCategorySeqNo());
+			queryProductBySeqNoParam.setProductStatus(getProductBySeqNoDto.getProductStatus());
+			queryProductBySeqNoParam.setProductDesc(getProductBySeqNoDto.getProductDesc());
+			queryProductBySeqNoParam.setMainPic(getProductBySeqNoDto.getSnCode());
+			queryProductBySeqNoParam.setPicList(getProductPicByProductSeqNo(productSeqNo, getProductBySeqNoDto.getSnCode()));
 			List<ProductColorSizeBean> productColorSizeBeans = getProductSizeColorByProductSeqNo(productSeqNo);
-			queryProductBySeqNoResponse.setProductColorSizeList(productColorSizeBeans);
-			List<Long> sizeList = productColorSizeBeans.stream().map(ProductColorSizeBean::getSizeSeqNo)
+			queryProductBySeqNoParam.setProductColorSizeList(productColorSizeBeans);
+			List<String> sizeList = productColorSizeBeans.stream().map(ProductColorSizeBean::getSizeSeqNo).distinct()
 					.collect(Collectors.toList());
-			List<Long> colorList = productColorSizeBeans.stream().map(ProductColorSizeBean::getSizeSeqNo)
+			List<String> colorList = productColorSizeBeans.stream().map(ProductColorSizeBean::getColorSeqNo).distinct()
 					.collect(Collectors.toList());
-			queryProductBySeqNoResponse.setSizeList(sizeList);
-			queryProductBySeqNoResponse.setColorList(colorList);
+			queryProductBySeqNoParam.setSizeList(sizeList);
+			queryProductBySeqNoParam.setColorList(colorList);
 		}
 
-		return queryProductBySeqNoResponse;
+		return queryProductBySeqNoParam;
 	}
 
 	public List<Long> getProductMpnByProductSeqNo(Long productSeqNo) {
@@ -231,11 +235,24 @@ public class ProductServiceImpl implements ProductService {
 		return supplierProductSkuEntities.stream().map(SupplierSkuEntity::getSeqNo).collect(Collectors.toList());
 	}
 
-	public List<String> getProductPicByProductSeqNo(Long productSeqNo) {
+	public List<String> getProductPicByProductSeqNo(Long productSeqNo, String mainPicSeqNo) {
 		List<SupplierProductPicEntity> supplierProductPicEntities = SupplierProductPicRepository
 				.findByProductSeqNo(productSeqNo);
-		return supplierProductPicEntities.stream().map(SupplierProductPicEntity::getSnCode)
-				.collect(Collectors.toList());
+		List<String> picList = supplierProductPicEntities.stream().map(SupplierProductPicEntity::getSnCode)
+			.collect(Collectors.toList());
+
+		// 過濾掉主圖片
+		picList = picList.stream().filter(picSeqNo -> !StringUtils.equals(picSeqNo, mainPicSeqNo)).collect(Collectors.toList());
+
+		// 若照片數量小於8張，則需塞入空值
+		if (picList.size() < 8) {
+			int originPicListSize = 8 - picList.size();
+			for (int i = 0; i < originPicListSize; i++) {
+				picList.add("");
+			}
+		}
+		
+		return picList;
 	}
 
 	public List<ProductColorSizeBean> getProductSizeColorByProductSeqNo(Long productSeqNo) {
@@ -247,8 +264,8 @@ public class ProductServiceImpl implements ProductService {
 		if (!CollectionUtils.isEmpty(supplierProductViewEntities)) {
 			for (SupplierProductViewEntity supplierProductViewEntity : supplierProductViewEntities) {
 				ProductColorSizeBean productColorSizeBean = new ProductColorSizeBean();
-				productColorSizeBean.setSizeSeqNo(supplierProductViewEntity.getSizeSeqNo());
-				productColorSizeBean.setColorSeqNo(supplierProductViewEntity.getColorSeqNo());
+				productColorSizeBean.setSizeSeqNo(String.valueOf(supplierProductViewEntity.getSizeSeqNo()));
+				productColorSizeBean.setColorSeqNo(String.valueOf(supplierProductViewEntity.getColorSeqNo()));
 				productColorSizeBean.setNotOrderCnt(supplierProductViewEntity.getNotOrderCnt());
 				productColorSizeBean.setOrderedCnt(supplierProductViewEntity.getOrderedCnt());
 				productColorSizeBean.setCheckOrderCnt(supplierProductViewEntity.getCheckOrderCnt());
@@ -259,6 +276,14 @@ public class ProductServiceImpl implements ProductService {
 			}
 		}
 		return productColorSizeList;
+	}
+
+	@Override
+	public QueryProductResponse editProduct(QueryProductBySeqNoParam queryProductBySeqNoParam) {
+
+
+
+		return null;
 	}
 
 }

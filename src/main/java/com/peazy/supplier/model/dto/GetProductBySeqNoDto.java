@@ -9,7 +9,7 @@ public interface GetProductBySeqNoDto  {
 	String getSnCode();
 	BigDecimal getCost();
 	BigDecimal getPrice();
-	String getCategory();
+	String getCategorySeqNo();
 	String getMpn();
 	String getSku();
 	String getProductDesc();
