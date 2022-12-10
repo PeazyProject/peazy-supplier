@@ -1,5 +1,6 @@
 package com.peazy.supplier.model.entity;
 
+import java.math.BigDecimal;
 import java.util.Date;
 
 import javax.persistence.Column;
@@ -23,12 +24,12 @@ public class SupplierProductColorSizeMappingEntity {
     private long colorSeqNo;
     @Column(name = "SizeSeqNo")
     private long sizeSeqNo;
-    private String notOrderCnt;
-    private String orderedCnt;
-    private String checkOrderCnt;
-    private String allocatedCnt;
-    private String readyDeliveryCnt;
-    private String finishCnt;
+    private BigDecimal notOrderCnt;
+    private BigDecimal orderedCnt;
+    private BigDecimal checkOrderCnt;
+    private BigDecimal allocatedCnt;
+    private BigDecimal readyDeliveryCnt;
+    private BigDecimal finishCnt;
     private String createUser;
     private Date createDt;
     private String updateUser;

@@ -1,9 +1,12 @@
 package com.peazy.supplier.service.Impl;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import javax.persistence.EntityManager;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,21 +24,26 @@ import com.peazy.supplier.model.entity.CommonPictureEntity;
 import com.peazy.supplier.model.entity.SupplierMpnEntity;
 import com.peazy.supplier.model.entity.SupplierProductCategoryEntity;
 import com.peazy.supplier.model.entity.SupplierProductColorEntity;
+import com.peazy.supplier.model.entity.SupplierProductColorSizeMappingEntity;
+import com.peazy.supplier.model.entity.SupplierProductEntity;
 import com.peazy.supplier.model.entity.SupplierProductPicEntity;
 import com.peazy.supplier.model.entity.SupplierProductSizeEntity;
 import com.peazy.supplier.model.entity.SupplierProductViewEntity;
 import com.peazy.supplier.model.entity.SupplierSkuEntity;
+import com.peazy.supplier.model.entity.SupplierVendorEntity;
 import com.peazy.supplier.model.request.QueryProductRequest;
 import com.peazy.supplier.model.response.QueryProductBySeqNoParam;
 import com.peazy.supplier.model.response.QueryProductResponse;
 import com.peazy.supplier.repository.CommonPictureRepository;
 import com.peazy.supplier.repository.SupplierProductCategoryRepository;
 import com.peazy.supplier.repository.SupplierProductColorRepository;
+import com.peazy.supplier.repository.SupplierProductColorSizeMappingRepository;
 import com.peazy.supplier.repository.SupplierProductMpnRepository;
 import com.peazy.supplier.repository.SupplierProductRepository;
 import com.peazy.supplier.repository.SupplierProductSizeRepository;
 import com.peazy.supplier.repository.SupplierProductSkuRepository;
 import com.peazy.supplier.repository.SupplierProductViewRepository;
+import com.peazy.supplier.repository.SupplierVendorRepository;
 import com.peazy.supplier.repository.SupplierProductPicRepository;
 import com.peazy.supplier.service.interfaces.ProductService;
 
@@ -64,10 +72,19 @@ public class ProductServiceImpl implements ProductService {
 	private SupplierProductCategoryRepository supplierProductCategoryRepository;
 
 	@Autowired
+	private SupplierVendorRepository supplierVendorRepository;
+
+	@Autowired
 	private SupplierProductPicRepository SupplierProductPicRepository;
 
 	@Autowired
 	private SupplierProductViewRepository supplierProductViewRepository;
+
+	@Autowired
+	private EntityManager entityManager;
+
+	@Autowired
+	private SupplierProductColorSizeMappingRepository supplierProductColorSizeMappingRepository;
 
 	@Override
 	public QueryProductResponse queryProduct(QueryProductRequest queryProductRequest) throws JsonProcessingException {
@@ -188,6 +205,21 @@ public class ProductServiceImpl implements ProductService {
 	}
 
 	@Override
+	public List<DropDownBean> getProductVendorOption() throws JsonProcessingException {
+		List<SupplierVendorEntity> vendorEntities = supplierVendorRepository.findAll();
+		List<DropDownBean> vendorList = new ArrayList<>();
+
+		for (SupplierVendorEntity entity : vendorEntities) {
+			DropDownBean dropDownBean = new DropDownBean();
+			dropDownBean.setValue(String.valueOf(entity.getSeqNo()));
+			dropDownBean.setLabel(entity.getVendor());
+			vendorList.add(dropDownBean);
+		}
+
+		return vendorList;
+	}
+
+	@Override
 	public QueryProductBySeqNoParam queryProductBySeqNo(Long productSeqNo) throws JsonProcessingException {
 
 		List<GetProductBySeqNoDto> supplierProudctViewList = supplierProductRepository
@@ -200,6 +232,7 @@ public class ProductServiceImpl implements ProductService {
 
 		QueryProductBySeqNoParam queryProductBySeqNoParam = new QueryProductBySeqNoParam();
 		if (getProductBySeqNoDto != null) {
+			queryProductBySeqNoParam.setProductSeqNo(getProductBySeqNoDto.getProductSeqNo());
 			queryProductBySeqNoParam.setProductName(getProductBySeqNoDto.getProductName());
 			queryProductBySeqNoParam.setMpnList(getProductMpnByProductSeqNo(productSeqNo));
 			queryProductBySeqNoParam.setSkuList(getProductSkuByProductSeqNo(productSeqNo));
@@ -218,21 +251,22 @@ public class ProductServiceImpl implements ProductService {
 					.collect(Collectors.toList());
 			queryProductBySeqNoParam.setSizeList(sizeList);
 			queryProductBySeqNoParam.setColorList(colorList);
+			queryProductBySeqNoParam.setVendorSeqNo(getProductBySeqNoDto.getVendorSeqNo());
 		}
 
 		return queryProductBySeqNoParam;
 	}
 
-	public List<Long> getProductMpnByProductSeqNo(Long productSeqNo) {
+	public List<String> getProductMpnByProductSeqNo(Long productSeqNo) {
 		List<SupplierMpnEntity> supplierProductMpnEntities = supplierProductMpnRepository
 				.findByProductSeqNo(productSeqNo);
-		return supplierProductMpnEntities.stream().map(SupplierMpnEntity::getSeqNo).collect(Collectors.toList());
+		return supplierProductMpnEntities.stream().map(SupplierMpnEntity::getMpn).collect(Collectors.toList());
 	}
 
-	public List<Long> getProductSkuByProductSeqNo(Long productSeqNo) {
+	public List<String> getProductSkuByProductSeqNo(Long productSeqNo) {
 		List<SupplierSkuEntity> supplierProductSkuEntities = supplierProductSkuRepository
 				.findByProductSeqNo(productSeqNo);
-		return supplierProductSkuEntities.stream().map(SupplierSkuEntity::getSeqNo).collect(Collectors.toList());
+		return supplierProductSkuEntities.stream().map(SupplierSkuEntity::getSku).collect(Collectors.toList());
 	}
 
 	public List<String> getProductPicByProductSeqNo(Long productSeqNo, String mainPicSeqNo) {
@@ -279,11 +313,130 @@ public class ProductServiceImpl implements ProductService {
 	}
 
 	@Override
-	public QueryProductResponse editProduct(QueryProductBySeqNoParam queryProductBySeqNoParam) {
+	public void editProduct(QueryProductBySeqNoParam queryProductBySeqNoParam) {
 
+		insertOrUpdateProduct(queryProductBySeqNoParam);
+		insertOrUpdateSku(queryProductBySeqNoParam.getSkuList(), queryProductBySeqNoParam.getProductSeqNo(), queryProductBySeqNoParam.getUserId());
+		insertOrUpdateMpn(queryProductBySeqNoParam.getMpnList(), queryProductBySeqNoParam.getProductSeqNo(), queryProductBySeqNoParam.getUserId());
+		insertOrUpdatePic(queryProductBySeqNoParam.getMainPic(), queryProductBySeqNoParam.getPicList(), 
+			queryProductBySeqNoParam.getProductSeqNo(), queryProductBySeqNoParam.getUserId());
+		insertOrUpdateProductColorSizeMapping(queryProductBySeqNoParam.getProductColorSizeList(), 
+			queryProductBySeqNoParam.getProductSeqNo(), queryProductBySeqNoParam.getUserId());
 
+	}
 
-		return null;
+	private void insertOrUpdateProduct(QueryProductBySeqNoParam queryProductBySeqNoParam) {
+
+		SupplierProductEntity supplierProductEntity = new SupplierProductEntity();
+
+		// 1. 若是編輯則取出原本的資料，若新增則直接set資料
+		if (StringUtils.isNotBlank(queryProductBySeqNoParam.getProductSeqNo())) {
+			Optional<SupplierProductEntity> supplierProductOptional = supplierProductRepository.findById(Long.parseLong(queryProductBySeqNoParam.getProductSeqNo()));
+			if (supplierProductOptional.isPresent()) {
+				supplierProductEntity = supplierProductOptional.get();
+			}
+		} else {
+			// TODO 測試確認這邊是否可以取得ProductSeqNo
+			entityManager.persist(supplierProductEntity);
+			System.out.println("LOOK supplierProductEntity = " + supplierProductEntity.getSeqNo());
+			supplierProductEntity.setCreateUser(queryProductBySeqNoParam.getUserId());
+			supplierProductEntity.setCreateDt(new Date());
+		}
+
+		// 2. set資料
+		if (StringUtils.isNotBlank(queryProductBySeqNoParam.getMainPic())) {
+			supplierProductEntity.setMainPicSeqNo(Long.parseLong(queryProductBySeqNoParam.getMainPic()));
+		}
+		supplierProductEntity.setProductName(queryProductBySeqNoParam.getProductName());
+		supplierProductEntity.setCost(queryProductBySeqNoParam.getCost());
+		supplierProductEntity.setPrice(queryProductBySeqNoParam.getPrice());
+		supplierProductEntity.setProductStatus(queryProductBySeqNoParam.getProductStatus());
+		supplierProductEntity.setProductCategorySeqNo(queryProductBySeqNoParam.getCategory());
+		supplierProductEntity.setProductDesc(queryProductBySeqNoParam.getProductDesc());
+		supplierProductEntity.setVendorSeqNo(queryProductBySeqNoParam.getVendorSeqNo());
+		if (!CollectionUtils.isEmpty(queryProductBySeqNoParam.getSkuList())) {
+			supplierProductEntity.setMainSkuSeqNo(String.valueOf(queryProductBySeqNoParam.getSkuList().get(0)));
+		}
+		supplierProductEntity.setUpdateUser(queryProductBySeqNoParam.getUserId());
+		supplierProductEntity.setUpdateDt(new Date());
+
+		supplierProductRepository.save(supplierProductEntity);
+
+	}
+
+	private void insertOrUpdateSku(List<String> skuList, String productSeqNo, String userId) {
+		
+		if (!CollectionUtils.isEmpty(supplierProductSkuRepository.findByProductSeqNo(Long.valueOf(productSeqNo)))) {
+			supplierProductSkuRepository.deleteByProductSeqNo(Long.valueOf(productSeqNo));
+		}
+
+		List<SupplierSkuEntity> supplierSkuEntities = new ArrayList<>();
+
+		skuList.forEach(sku -> {
+			SupplierSkuEntity supplierSkuEntity = new SupplierSkuEntity();
+			supplierSkuEntity.setSku(sku);
+			supplierSkuEntity.setProductSeqNo(Long.valueOf(productSeqNo));
+			supplierSkuEntity.setCreateDt(new Date());
+			supplierSkuEntity.setCreateUser(userId);
+			supplierSkuEntity.setUpdateDt(new Date());
+			supplierSkuEntity.setUpdateUser(userId);
+			supplierSkuEntities.add(supplierSkuEntity);
+		});
+
+		supplierProductSkuRepository.saveAll(supplierSkuEntities);
+	}
+
+	private void insertOrUpdateMpn(List<String> mpnList, String productSeqNo, String userId) {
+		
+		if (!CollectionUtils.isEmpty(supplierProductMpnRepository.findByProductSeqNo(Long.valueOf(productSeqNo)))) {
+			supplierProductMpnRepository.deleteByProductSeqNo(Long.valueOf(productSeqNo));
+		}
+
+		List<SupplierMpnEntity> supplierMpnEntities = new ArrayList<>();
+
+		mpnList.forEach(mpn -> {
+			SupplierMpnEntity supplierMpnEntity = new SupplierMpnEntity();
+			supplierMpnEntity.setMpn(mpn);
+			supplierMpnEntity.setProductSeqNo(Long.valueOf(productSeqNo));
+			supplierMpnEntity.setCreateDt(new Date());
+			supplierMpnEntity.setCreateUser(userId);
+			supplierMpnEntity.setUpdateDt(new Date());
+			supplierMpnEntity.setUpdateUser(userId);
+			supplierMpnEntities.add(supplierMpnEntity);
+		});
+
+		supplierProductMpnRepository.saveAll(supplierMpnEntities);
+
+	}
+
+	private void insertOrUpdatePic(String mainPic, List<String> picList, String productSeqNo, String userId) {
+		// TODO 這邊有少拿檔案的Blob，前端那邊要再補這段，等等回來處理這邊
+	}
+
+	private void insertOrUpdateProductColorSizeMapping(List<ProductColorSizeBean> productColorSizeList, String productSeqNo, String userId) {
+		if (!CollectionUtils.isEmpty(supplierProductColorSizeMappingRepository.findByProductSeqNo(Long.valueOf(productSeqNo)))) {
+			supplierProductColorSizeMappingRepository.deleteByProductSeqNo(Long.valueOf(productSeqNo));
+		}
+
+		List<SupplierProductColorSizeMappingEntity> supplierProductColorSizeMappingEntities = new ArrayList<>();
+
+		productColorSizeList.forEach(ProductColorSizeBean -> {
+			SupplierProductColorSizeMappingEntity supplierProductColorSizeMappingEntity = new SupplierProductColorSizeMappingEntity();
+			supplierProductColorSizeMappingEntity.setProductSeqNo(Long.valueOf(productSeqNo));
+			supplierProductColorSizeMappingEntity.setColorSeqNo(Long.valueOf(ProductColorSizeBean.getColorSeqNo()));
+			supplierProductColorSizeMappingEntity.setSizeSeqNo(Long.valueOf(ProductColorSizeBean.getSizeSeqNo()));
+			supplierProductColorSizeMappingEntity.setNotOrderCnt(ProductColorSizeBean.getNotOrderCnt());
+			supplierProductColorSizeMappingEntity.setOrderedCnt(ProductColorSizeBean.getOrderedCnt());
+			supplierProductColorSizeMappingEntity.setCheckOrderCnt(ProductColorSizeBean.getCheckOrderCnt());
+			supplierProductColorSizeMappingEntity.setAllocatedCnt(ProductColorSizeBean.getAllocatedCnt());
+			supplierProductColorSizeMappingEntity.setReadyDeliveryCnt(ProductColorSizeBean.getReadyDeliveryCnt());
+			supplierProductColorSizeMappingEntity.setFinishCnt(ProductColorSizeBean.getFinishCnt());
+			supplierProductColorSizeMappingEntity.setCreateUser(userId);
+			supplierProductColorSizeMappingEntity.setCreateDt(new Date());
+			supplierProductColorSizeMappingEntity.setUpdateUser(userId);
+			supplierProductColorSizeMappingEntity.setUpdateDt(new Date());
+		});
+		supplierProductColorSizeMappingRepository.saveAll(supplierProductColorSizeMappingEntities);
 	}
 
 }

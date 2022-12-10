@@ -12,4 +12,6 @@ public interface SupplierProductSkuRepository extends JpaRepository<SupplierSkuE
 
     List<SupplierSkuEntity> findByProductSeqNo(Long productSeqNo);
 
+    void deleteByProductSeqNo(Long productSeqNo);
+
 }

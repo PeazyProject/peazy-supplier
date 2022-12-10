@@ -1,9 +1,12 @@
 package com.peazy.supplier.model.entity;
 
+import java.math.BigDecimal;
 import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
@@ -16,15 +19,17 @@ public class SupplierProductEntity {
 
 	@Id	
 	@Column(name = "SeqNo", unique = true, nullable = false)
+	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private long seqNo;
 	private long mainPicSeqNo;
 	private String productName;
-	private String cost;
-	private String price;
-	private String ProductStatus;
-	private String ProductCategorySeqNo;
-	private String ProductDesc;
-	private String MainSkuSeqNo;
+	private BigDecimal cost;
+	private BigDecimal price;
+	private String productStatus;
+	private String productCategorySeqNo;
+	private String productDesc;
+	private String mainSkuSeqNo;
+	private String vendorSeqNo;
 	private String createUser;
 	private Date createDt;
 	private String updateUser;

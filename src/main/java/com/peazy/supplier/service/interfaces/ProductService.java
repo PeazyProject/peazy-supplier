@@ -20,7 +20,9 @@ public interface ProductService {
 
 	List<DropDownBean> getProductCategoryOption() throws JsonProcessingException;
 
+	List<DropDownBean> getProductVendorOption() throws JsonProcessingException;
+
 	QueryProductBySeqNoParam queryProductBySeqNo(Long seqNo) throws JsonProcessingException;
 
-	QueryProductResponse editProduct(QueryProductBySeqNoParam queryProductBySeqNoParam);
+	void editProduct(QueryProductBySeqNoParam queryProductBySeqNoParam);
 }

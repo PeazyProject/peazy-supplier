@@ -19,8 +19,6 @@ public class SupplierSkuEntity {
 	private long seqNo;
 	private long productSeqNo;
 	private String sku;
-	private String oem;
-	private String brand;
 	private String createUser;
 	private Date createDt;
 	private String updateUser;

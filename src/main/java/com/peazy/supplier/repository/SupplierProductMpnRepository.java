@@ -12,4 +12,6 @@ public interface SupplierProductMpnRepository extends JpaRepository<SupplierMpnE
 
     List<SupplierMpnEntity> findByProductSeqNo(Long productSeqNo);
 
+    void deleteByProductSeqNo(Long productSeqNo);
+
 }

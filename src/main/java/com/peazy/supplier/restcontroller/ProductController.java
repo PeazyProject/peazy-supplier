@@ -14,9 +14,12 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.peazy.supplier.model.bean.BlobDocumentBean;
 import com.peazy.supplier.model.bean.DropDownBean;
 import com.peazy.supplier.model.request.QueryProductRequest;
@@ -72,6 +75,13 @@ public class ProductController {
 		return ResponseEntity.ok(result);
 	}
 
+	@GetMapping(value = "/getProductVendorOption")
+	public ResponseEntity<List<DropDownBean>> getProductVendorOption() throws JsonProcessingException {
+
+		List<DropDownBean> result = productService.getProductVendorOption();
+		return ResponseEntity.ok(result);
+	}
+
 	@GetMapping(value = "/queryProductBySeqNo/{seqNo}")
 	public ResponseEntity<QueryProductBySeqNoParam> queryProductBySeqNo(@PathVariable Long seqNo)
 			throws JsonProcessingException {
@@ -81,11 +91,18 @@ public class ProductController {
 		return ResponseEntity.ok(queryProductBySeqNoParam);
 	}
 
-	@PostMapping(value = "/editProduct")
-	public ResponseEntity<Void> editProduct(@RequestBody QueryProductBySeqNoParam queryProductBySeqNoParam)
+	// TODO 需要做一隻API For不更新圖片的，然後下面這支API可以測試了
+	@PostMapping(value = "/editProduct", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE}, produces = {MediaType.APPLICATION_JSON_VALUE})
+	public ResponseEntity<Void> editProduct(@RequestParam("queryProductBySeqNoParam") String queryProductBySeqNoParam,
+		@RequestParam("mainPicFile") MultipartFile mainPicFile)
 			throws JsonProcessingException {
-		logger.info("editProduct request = {}", queryProductBySeqNoParam);
-		productService.editProduct(queryProductBySeqNoParam);
+		ObjectMapper objectMapper = new ObjectMapper();
+		QueryProductBySeqNoParam request = objectMapper.readValue(queryProductBySeqNoParam, QueryProductBySeqNoParam.class);
+		logger.info("editProduct request = {}", request);
+		logger.info("editProduct mainPicFile = {}", mainPicFile);
+		// logger.info("editProduct picFiles = {}", picFiles);
+
+		// productService.editProduct(queryProductBySeqNoParam);
 		return ResponseEntity.ok(null);
 	}
 }

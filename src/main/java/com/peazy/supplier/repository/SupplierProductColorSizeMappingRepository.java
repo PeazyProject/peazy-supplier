@@ -12,4 +12,6 @@ public interface SupplierProductColorSizeMappingRepository
                 extends JpaRepository<SupplierProductColorSizeMappingEntity, Long> {
 
         List<SupplierProductColorSizeMappingEntity> findByProductSeqNo(Long productSeqNo);
+
+        void deleteByProductSeqNo(Long productSeqNo);
 }

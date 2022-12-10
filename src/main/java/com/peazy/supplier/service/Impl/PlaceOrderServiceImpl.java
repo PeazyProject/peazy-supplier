@@ -1,5 +1,6 @@
 package com.peazy.supplier.service.Impl;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -45,8 +46,8 @@ public class PlaceOrderServiceImpl implements PlaceOrderService {
                     .findById(orderProduct.getPcsmSeqNo());
             if (pcsmOptinal.isPresent()) {
                 SupplierProductColorSizeMappingEntity pcsm = pcsmOptinal.get();
-                pcsm.setOrderedCnt(pcsm.getOrderedCnt() + pcsm.getNotOrderCnt());
-                pcsm.setNotOrderCnt("0");
+                pcsm.setOrderedCnt(pcsm.getOrderedCnt().add(pcsm.getNotOrderCnt()));
+                pcsm.setNotOrderCnt(BigDecimal.ZERO);
                 pcsmList.add(pcsm);
             }
         });

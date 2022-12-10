@@ -19,8 +19,6 @@ public class SupplierMpnEntity {
 	private long seqNo;
 	private long productSeqNo;
 	private String mpn;
-	private String oem;
-	private String brand;
 	private String createUser;
 	private Date createDt;
 	private String updateUser;

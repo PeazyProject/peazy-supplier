@@ -89,6 +89,7 @@ public interface SupplierProductRepository extends JpaRepository<SupplierProduct
             + "     supplier_product_view.ProductDesc, "
             + "     supplier_product_view.CreateDt, "
             + "     supplier_product_view.ProductStatus, "
+            + "     supplier_product_view.VendorSeqNo, "
             + "     SUM(supplier_product_view.CheckOrderCnt) as ProductQty "
             + " FROM supplier_product_view "
             + " WHERE 1 = 1 "
@@ -104,7 +105,8 @@ public interface SupplierProductRepository extends JpaRepository<SupplierProduct
             + " supplier_product_view.Sku, "
             + " supplier_product_view.ProductDesc, "
             + " supplier_product_view.CreateDt, "
-            + " supplier_product_view.ProductStatus "
+            + " supplier_product_view.ProductStatus, "
+            + " supplier_product_view.VendorSeqNo "
             + " ORDER BY supplier_product_view.CreateDt ", nativeQuery = true)
     public List<GetProductBySeqNoDto> queryProductBySeqNo(@Param("productSeqNo") Long productSeqNo);
 

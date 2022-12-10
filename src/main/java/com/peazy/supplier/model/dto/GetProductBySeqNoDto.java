@@ -16,4 +16,5 @@ public interface GetProductBySeqNoDto  {
 	Date getCreateDt();
 	String getProductStatus();
 	int getProductQty();
+	String getVendorSeqNo();
 }
