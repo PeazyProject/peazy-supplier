@@ -313,16 +313,18 @@ public class ProductServiceImpl implements ProductService {
 	}
 
 	@Override
-	public void editProduct(QueryProductBySeqNoParam queryProductBySeqNoParam) {
-
+	public void editProduct(QueryProductBySeqNoParam queryProductBySeqNoParam, boolean isNeedUpdatePic) {
 		insertOrUpdateProduct(queryProductBySeqNoParam);
 		insertOrUpdateSku(queryProductBySeqNoParam.getSkuList(), queryProductBySeqNoParam.getProductSeqNo(), queryProductBySeqNoParam.getUserId());
 		insertOrUpdateMpn(queryProductBySeqNoParam.getMpnList(), queryProductBySeqNoParam.getProductSeqNo(), queryProductBySeqNoParam.getUserId());
-		insertOrUpdatePic(queryProductBySeqNoParam.getMainPic(), queryProductBySeqNoParam.getPicList(), 
+		
+		if (isNeedUpdatePic) {
+			insertOrUpdatePic(queryProductBySeqNoParam.getMainPic(), queryProductBySeqNoParam.getPicList(), 
 			queryProductBySeqNoParam.getProductSeqNo(), queryProductBySeqNoParam.getUserId());
+		}
+
 		insertOrUpdateProductColorSizeMapping(queryProductBySeqNoParam.getProductColorSizeList(), 
 			queryProductBySeqNoParam.getProductSeqNo(), queryProductBySeqNoParam.getUserId());
-
 	}
 
 	private void insertOrUpdateProduct(QueryProductBySeqNoParam queryProductBySeqNoParam) {

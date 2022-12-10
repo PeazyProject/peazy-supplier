@@ -91,18 +91,28 @@ public class ProductController {
 		return ResponseEntity.ok(queryProductBySeqNoParam);
 	}
 
-	// TODO 需要做一隻API For不更新圖片的，然後下面這支API可以測試了
-	@PostMapping(value = "/editProduct", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE}, produces = {MediaType.APPLICATION_JSON_VALUE})
-	public ResponseEntity<Void> editProduct(@RequestParam("queryProductBySeqNoParam") String queryProductBySeqNoParam,
-		@RequestParam("mainPicFile") MultipartFile mainPicFile)
+	@PostMapping(value = "/editProductWithoutPic", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE}, produces = {MediaType.APPLICATION_JSON_VALUE})
+	public ResponseEntity<Void> editProductWithoutPic(@RequestParam("queryProductBySeqNoParam") String queryProductBySeqNoParam)
 			throws JsonProcessingException {
 		ObjectMapper objectMapper = new ObjectMapper();
 		QueryProductBySeqNoParam request = objectMapper.readValue(queryProductBySeqNoParam, QueryProductBySeqNoParam.class);
 		logger.info("editProduct request = {}", request);
-		logger.info("editProduct mainPicFile = {}", mainPicFile);
-		// logger.info("editProduct picFiles = {}", picFiles);
 
-		// productService.editProduct(queryProductBySeqNoParam);
+		// productService.editProduct(request, false);
+		return ResponseEntity.ok(null);
+	}
+
+	@PostMapping(value = "/editProduct", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE}, produces = {MediaType.APPLICATION_JSON_VALUE})
+	public ResponseEntity<Void> editProduct(@RequestParam("queryProductBySeqNoParam") String queryProductBySeqNoParam,
+		@RequestParam("picFiles") List<MultipartFile> picFiles)
+			throws JsonProcessingException {
+		ObjectMapper objectMapper = new ObjectMapper();
+		QueryProductBySeqNoParam request = objectMapper.readValue(queryProductBySeqNoParam, QueryProductBySeqNoParam.class);
+		logger.info("editProduct request = {}", request);
+		// logger.info("editProduct mainPicFile = {}", mainPicFile);
+		logger.info("editProduct picFiles = {}", picFiles);
+
+		// productService.editProduct(request, true);
 		return ResponseEntity.ok(null);
 	}
 }

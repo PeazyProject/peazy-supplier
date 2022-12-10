@@ -24,5 +24,6 @@ public interface ProductService {
 
 	QueryProductBySeqNoParam queryProductBySeqNo(Long seqNo) throws JsonProcessingException;
 
-	void editProduct(QueryProductBySeqNoParam queryProductBySeqNoParam);
+	void editProduct(QueryProductBySeqNoParam queryProductBySeqNoParam, boolean isNeedUpdatePic);
+
 }
