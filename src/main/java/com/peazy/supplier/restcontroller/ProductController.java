@@ -98,21 +98,21 @@ public class ProductController {
 		QueryProductBySeqNoParam request = objectMapper.readValue(queryProductBySeqNoParam, QueryProductBySeqNoParam.class);
 		logger.info("editProduct request = {}", request);
 
-		// productService.editProduct(request, false);
+		productService.editProduct(request, false);
 		return ResponseEntity.ok(null);
 	}
 
 	@PostMapping(value = "/editProduct", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE}, produces = {MediaType.APPLICATION_JSON_VALUE})
 	public ResponseEntity<Void> editProduct(@RequestParam("queryProductBySeqNoParam") String queryProductBySeqNoParam,
-		@RequestParam("picFiles") List<MultipartFile> picFiles)
+		@RequestParam("mainPicFile") List<MultipartFile> mainPicFile, @RequestParam("picFiles") List<MultipartFile> picFiles)
 			throws JsonProcessingException {
 		ObjectMapper objectMapper = new ObjectMapper();
 		QueryProductBySeqNoParam request = objectMapper.readValue(queryProductBySeqNoParam, QueryProductBySeqNoParam.class);
 		logger.info("editProduct request = {}", request);
-		// logger.info("editProduct mainPicFile = {}", mainPicFile);
-		logger.info("editProduct picFiles = {}", picFiles);
+		logger.info("editProduct mainPicFile = {}", mainPicFile);
+		logger.info("editProduct picFiles = {}", picFiles.size());
 
-		// productService.editProduct(request, true);
+		productService.editProduct(request, true);
 		return ResponseEntity.ok(null);
 	}
 }

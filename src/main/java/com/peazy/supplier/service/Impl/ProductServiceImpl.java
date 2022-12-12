@@ -312,11 +312,10 @@ public class ProductServiceImpl implements ProductService {
 		return productColorSizeList;
 	}
 
+	// TODO 下次先寫上傳圖片的部分
 	@Override
 	public void editProduct(QueryProductBySeqNoParam queryProductBySeqNoParam, boolean isNeedUpdatePic) {
 		insertOrUpdateProduct(queryProductBySeqNoParam);
-		insertOrUpdateSku(queryProductBySeqNoParam.getSkuList(), queryProductBySeqNoParam.getProductSeqNo(), queryProductBySeqNoParam.getUserId());
-		insertOrUpdateMpn(queryProductBySeqNoParam.getMpnList(), queryProductBySeqNoParam.getProductSeqNo(), queryProductBySeqNoParam.getUserId());
 		
 		if (isNeedUpdatePic) {
 			insertOrUpdatePic(queryProductBySeqNoParam.getMainPic(), queryProductBySeqNoParam.getPicList(), 
@@ -338,9 +337,6 @@ public class ProductServiceImpl implements ProductService {
 				supplierProductEntity = supplierProductOptional.get();
 			}
 		} else {
-			// TODO 測試確認這邊是否可以取得ProductSeqNo
-			entityManager.persist(supplierProductEntity);
-			System.out.println("LOOK supplierProductEntity = " + supplierProductEntity.getSeqNo());
 			supplierProductEntity.setCreateUser(queryProductBySeqNoParam.getUserId());
 			supplierProductEntity.setCreateDt(new Date());
 		}
@@ -356,17 +352,29 @@ public class ProductServiceImpl implements ProductService {
 		supplierProductEntity.setProductCategorySeqNo(queryProductBySeqNoParam.getCategory());
 		supplierProductEntity.setProductDesc(queryProductBySeqNoParam.getProductDesc());
 		supplierProductEntity.setVendorSeqNo(queryProductBySeqNoParam.getVendorSeqNo());
-		if (!CollectionUtils.isEmpty(queryProductBySeqNoParam.getSkuList())) {
-			supplierProductEntity.setMainSkuSeqNo(String.valueOf(queryProductBySeqNoParam.getSkuList().get(0)));
+
+		// 更新SKU資料
+		String mainSkuSeqNo = insertOrUpdateSku(queryProductBySeqNoParam.getSkuList(), queryProductBySeqNoParam.getProductSeqNo(), queryProductBySeqNoParam.getUserId());
+		if (StringUtils.isNotEmpty(mainSkuSeqNo)) {
+			supplierProductEntity.setMainSkuSeqNo(mainSkuSeqNo);
 		}
+
+		// 更新MPN資料
+		String mainMpnSeqNo = insertOrUpdateMpn(queryProductBySeqNoParam.getMpnList(), queryProductBySeqNoParam.getProductSeqNo(), queryProductBySeqNoParam.getUserId());
+		if (StringUtils.isNotEmpty(mainMpnSeqNo)) {
+			supplierProductEntity.setMainMpnSeqNo(mainMpnSeqNo);
+		}
+
 		supplierProductEntity.setUpdateUser(queryProductBySeqNoParam.getUserId());
 		supplierProductEntity.setUpdateDt(new Date());
 
-		supplierProductRepository.save(supplierProductEntity);
-
+		System.out.println("LOOK1 supplierProductEntity = " + supplierProductEntity);
+		supplierProductEntity = supplierProductRepository.save(supplierProductEntity);
+		queryProductBySeqNoParam.setProductSeqNo(String.valueOf(supplierProductEntity.getSeqNo()));
+		System.out.println("LOOK2 supplierProductEntity = " + supplierProductEntity);
 	}
 
-	private void insertOrUpdateSku(List<String> skuList, String productSeqNo, String userId) {
+	private String insertOrUpdateSku(List<String> skuList, String productSeqNo, String userId) {
 		
 		if (!CollectionUtils.isEmpty(supplierProductSkuRepository.findByProductSeqNo(Long.valueOf(productSeqNo)))) {
 			supplierProductSkuRepository.deleteByProductSeqNo(Long.valueOf(productSeqNo));
@@ -374,7 +382,7 @@ public class ProductServiceImpl implements ProductService {
 
 		List<SupplierSkuEntity> supplierSkuEntities = new ArrayList<>();
 
-		skuList.forEach(sku -> {
+		for (String sku : skuList) {
 			SupplierSkuEntity supplierSkuEntity = new SupplierSkuEntity();
 			supplierSkuEntity.setSku(sku);
 			supplierSkuEntity.setProductSeqNo(Long.valueOf(productSeqNo));
@@ -383,12 +391,16 @@ public class ProductServiceImpl implements ProductService {
 			supplierSkuEntity.setUpdateDt(new Date());
 			supplierSkuEntity.setUpdateUser(userId);
 			supplierSkuEntities.add(supplierSkuEntity);
-		});
+		}
 
-		supplierProductSkuRepository.saveAll(supplierSkuEntities);
+		supplierSkuEntities = supplierProductSkuRepository.saveAll(supplierSkuEntities);
+		if (!CollectionUtils.isEmpty(supplierSkuEntities)) {
+			return String.valueOf(supplierSkuEntities.get(0).getSeqNo());
+		}
+		return null;
 	}
 
-	private void insertOrUpdateMpn(List<String> mpnList, String productSeqNo, String userId) {
+	private String insertOrUpdateMpn(List<String> mpnList, String productSeqNo, String userId) {
 		
 		if (!CollectionUtils.isEmpty(supplierProductMpnRepository.findByProductSeqNo(Long.valueOf(productSeqNo)))) {
 			supplierProductMpnRepository.deleteByProductSeqNo(Long.valueOf(productSeqNo));
@@ -396,7 +408,7 @@ public class ProductServiceImpl implements ProductService {
 
 		List<SupplierMpnEntity> supplierMpnEntities = new ArrayList<>();
 
-		mpnList.forEach(mpn -> {
+		for (String mpn : mpnList) {
 			SupplierMpnEntity supplierMpnEntity = new SupplierMpnEntity();
 			supplierMpnEntity.setMpn(mpn);
 			supplierMpnEntity.setProductSeqNo(Long.valueOf(productSeqNo));
@@ -405,10 +417,13 @@ public class ProductServiceImpl implements ProductService {
 			supplierMpnEntity.setUpdateDt(new Date());
 			supplierMpnEntity.setUpdateUser(userId);
 			supplierMpnEntities.add(supplierMpnEntity);
-		});
+		}
 
-		supplierProductMpnRepository.saveAll(supplierMpnEntities);
-
+		supplierMpnEntities = supplierProductMpnRepository.saveAll(supplierMpnEntities);
+		if (!CollectionUtils.isEmpty(supplierMpnEntities)) {
+			return String.valueOf(supplierMpnEntities.get(0).getSeqNo());
+		}
+		return null;
 	}
 
 	private void insertOrUpdatePic(String mainPic, List<String> picList, String productSeqNo, String userId) {
@@ -437,6 +452,8 @@ public class ProductServiceImpl implements ProductService {
 			supplierProductColorSizeMappingEntity.setCreateDt(new Date());
 			supplierProductColorSizeMappingEntity.setUpdateUser(userId);
 			supplierProductColorSizeMappingEntity.setUpdateDt(new Date());
+
+			supplierProductColorSizeMappingEntities.add(supplierProductColorSizeMappingEntity);
 		});
 		supplierProductColorSizeMappingRepository.saveAll(supplierProductColorSizeMappingEntities);
 	}

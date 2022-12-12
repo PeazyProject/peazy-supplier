@@ -29,6 +29,7 @@ public class SupplierProductEntity {
 	private String productCategorySeqNo;
 	private String productDesc;
 	private String mainSkuSeqNo;
+	private String mainMpnSeqNo;
 	private String vendorSeqNo;
 	private String createUser;
 	private Date createDt;

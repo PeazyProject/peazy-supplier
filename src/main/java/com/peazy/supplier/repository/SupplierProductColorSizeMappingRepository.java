@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.peazy.supplier.model.entity.SupplierProductColorSizeMappingEntity;
 
@@ -13,5 +14,6 @@ public interface SupplierProductColorSizeMappingRepository
 
         List<SupplierProductColorSizeMappingEntity> findByProductSeqNo(Long productSeqNo);
 
+        @Transactional
         void deleteByProductSeqNo(Long productSeqNo);
 }
