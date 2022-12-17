@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.peazy.supplier.model.request.ConfirmCheckOrderRequest;
 import com.peazy.supplier.model.request.QueryCheckOrderRequest;
 import com.peazy.supplier.model.response.QueryCheckOrderItemResponse;
 import com.peazy.supplier.model.response.QueryCheckOrderResponse;
@@ -53,5 +53,12 @@ public class CheckOrderController {
         QueryCheckOrderResponse queryCheckOrderResponse = checkOrderService.queryCheckOrder(req);
         log.info("queryCheckOrder = ",queryCheckOrderResponse);
         return ResponseEntity.ok(queryCheckOrderResponse);
+    }
+
+    @PostMapping(value = "/confirmCheckOrder")
+    public ResponseEntity<QueryCheckOrderResponse> confirmCheckOrder(@RequestBody ConfirmCheckOrderRequest req)
+            throws JsonProcessingException {
+        log.info("confirmCheckOrder = {}", req);
+        return ResponseEntity.ok(null);
     }
 }
