@@ -45,7 +45,7 @@ public interface SupplierProductViewRepository extends JpaRepository<SupplierPro
                         @Param("skuList") List<String> skuList,
                         @Param("isAvailable") String isAvailable);
 
-        @Query(value = "SELECT supplier_product_view.* "
+        @Query(value = "SELECT supplier_product_view.*"
                         + "FROM supplier_product_view "
                         + "WHERE VendorSeqNo = :vendorSeqNo AND if(:type = 'notOrder', NotOrderCnt > 0, 1 = 1) AND if(:type = 'stock', NotOrderCnt > 0, 1 = 1) "
                         + "ORDER BY ProductSeqNo", nativeQuery = true)

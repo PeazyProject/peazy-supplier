@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.peazy.supplier.model.bean.PlaceOrderBean;
 import com.peazy.supplier.model.entity.SupplierProductColorSizeMappingEntity;
 import com.peazy.supplier.model.entity.SupplierProductViewEntity;
 import com.peazy.supplier.model.entity.SupplierVendorEntity;
@@ -34,9 +35,33 @@ public class PlaceOrderServiceImpl implements PlaceOrderService {
         return supplierVendorRepository.findAll();
     }
 
-    public List<SupplierProductViewEntity> getOrderProductList(Long vendorSeqNo, String type)
+    public List<PlaceOrderBean> getOrderProductList(Long vendorSeqNo, String type)
             throws JsonProcessingException {
-        return supplierProductViewRepository.queryOrderProduct(vendorSeqNo, type);
+        List<SupplierProductViewEntity> list = supplierProductViewRepository.queryOrderProduct(vendorSeqNo, type);
+        List<PlaceOrderBean> orderProductList = new ArrayList<>();
+        // Map<PlaceOrderBean, BigDecimal> map;
+        list.stream().forEach(entity -> {
+            Optional<PlaceOrderBean> placeOrderBeanOpt = orderProductList.stream()
+                    .filter(placeOrderBean -> placeOrderBean.getProductSeqNo() == entity.getProductSeqNo()).findFirst();
+            if (placeOrderBeanOpt.isPresent()) {
+                placeOrderBeanOpt.get()
+                        .setNotOrderCnt(placeOrderBeanOpt.get().getNotOrderCnt().add(entity.getNotOrderCnt()));
+            } else {
+                PlaceOrderBean bean = new PlaceOrderBean();
+                bean.setProductSeqNo(entity.getProductSeqNo());
+                bean.setProductName(entity.getProductName());
+                bean.setSku(entity.getSku());
+                bean.setCategory(entity.getCategory());
+                bean.setNotOrderCnt(entity.getNotOrderCnt());
+                orderProductList.add(bean);
+            }
+        });
+        return orderProductList;
+    }
+
+    public List<SupplierProductViewEntity> getOrderProductDetailList(Long productSeqNo)
+            throws JsonProcessingException {
+        return supplierProductViewRepository.queryOrderProductBySeqNo(productSeqNo);
     }
 
     public void orderProducts(List<SupplierProductViewEntity> orderProductList) throws JsonProcessingException {
