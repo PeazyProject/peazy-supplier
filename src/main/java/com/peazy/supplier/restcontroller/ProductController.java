@@ -1,5 +1,6 @@
 package com.peazy.supplier.restcontroller;
 
+import java.io.IOException;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -98,21 +99,19 @@ public class ProductController {
 		QueryProductBySeqNoParam request = objectMapper.readValue(queryProductBySeqNoParam, QueryProductBySeqNoParam.class);
 		logger.info("editProduct request = {}", request);
 
-		productService.editProduct(request, false);
+		productService.editProductWithoutPic(request);
 		return ResponseEntity.ok(null);
 	}
 
 	@PostMapping(value = "/editProduct", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE}, produces = {MediaType.APPLICATION_JSON_VALUE})
 	public ResponseEntity<Void> editProduct(@RequestParam("queryProductBySeqNoParam") String queryProductBySeqNoParam,
-		@RequestParam("mainPicFile") List<MultipartFile> mainPicFile, @RequestParam("picFiles") List<MultipartFile> picFiles)
-			throws JsonProcessingException {
+		@RequestParam("mainPicFile") MultipartFile mainPicFile, @RequestParam("picFiles") List<MultipartFile> picFiles)
+			throws IOException {
 		ObjectMapper objectMapper = new ObjectMapper();
 		QueryProductBySeqNoParam request = objectMapper.readValue(queryProductBySeqNoParam, QueryProductBySeqNoParam.class);
 		logger.info("editProduct request = {}", request);
-		logger.info("editProduct mainPicFile = {}", mainPicFile);
-		logger.info("editProduct picFiles = {}", picFiles.size());
 
-		productService.editProduct(request, true);
+		productService.editProduct(request, mainPicFile, picFiles);
 		return ResponseEntity.ok(null);
 	}
 }

@@ -19,7 +19,7 @@ public class CommonPictureEntity {
 	@Id	
 	@Column(name = "SnCode", unique = true, nullable = false)
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private String snCode;
+	private long snCode;
 	private byte[] picture;
 	private String pictureName;
 	private String pictureExtension;

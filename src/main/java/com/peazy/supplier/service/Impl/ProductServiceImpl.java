@@ -1,21 +1,23 @@
 package com.peazy.supplier.service.Impl;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import javax.persistence.EntityManager;
-
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.peazy.supplier.model.bean.BlobDocumentBean;
 import com.peazy.supplier.model.bean.DropDownBean;
+import com.peazy.supplier.model.bean.PictureSnCodeBean;
 import com.peazy.supplier.model.bean.ProductColorSizeBean;
 import com.peazy.supplier.model.bean.QueryProductBean;
 import com.peazy.supplier.model.dto.GetProductByFilterDto;
@@ -75,13 +77,10 @@ public class ProductServiceImpl implements ProductService {
 	private SupplierVendorRepository supplierVendorRepository;
 
 	@Autowired
-	private SupplierProductPicRepository SupplierProductPicRepository;
+	private SupplierProductPicRepository supplierProductPicRepository;
 
 	@Autowired
 	private SupplierProductViewRepository supplierProductViewRepository;
-
-	@Autowired
-	private EntityManager entityManager;
 
 	@Autowired
 	private SupplierProductColorSizeMappingRepository supplierProductColorSizeMappingRepository;
@@ -149,7 +148,7 @@ public class ProductServiceImpl implements ProductService {
 
 	@Override
 	public BlobDocumentBean getImgUrl(String snCode) throws JsonProcessingException {
-		Optional<CommonPictureEntity> commonPicOptional = commonPictureRepository.findById(snCode);
+		Optional<CommonPictureEntity> commonPicOptional = commonPictureRepository.findById(Long.valueOf(snCode));
 		if (commonPicOptional.isPresent()) {
 			BlobDocumentBean blobDocumentBean = new BlobDocumentBean();
 			blobDocumentBean
@@ -241,8 +240,8 @@ public class ProductServiceImpl implements ProductService {
 			queryProductBySeqNoParam.setCategory(getProductBySeqNoDto.getCategorySeqNo());
 			queryProductBySeqNoParam.setProductStatus(getProductBySeqNoDto.getProductStatus());
 			queryProductBySeqNoParam.setProductDesc(getProductBySeqNoDto.getProductDesc());
-			queryProductBySeqNoParam.setMainPic(getProductBySeqNoDto.getSnCode());
-			queryProductBySeqNoParam.setPicList(getProductPicByProductSeqNo(productSeqNo, getProductBySeqNoDto.getSnCode()));
+			queryProductBySeqNoParam.setMainPicSnCode(getProductBySeqNoDto.getSnCode());
+			queryProductBySeqNoParam.setPicSnCodeList(getProductPicByProductSeqNo(productSeqNo, getProductBySeqNoDto.getSnCode()));
 			List<ProductColorSizeBean> productColorSizeBeans = getProductSizeColorByProductSeqNo(productSeqNo);
 			queryProductBySeqNoParam.setProductColorSizeList(productColorSizeBeans);
 			List<String> sizeList = productColorSizeBeans.stream().map(ProductColorSizeBean::getSizeSeqNo).distinct()
@@ -270,7 +269,7 @@ public class ProductServiceImpl implements ProductService {
 	}
 
 	public List<String> getProductPicByProductSeqNo(Long productSeqNo, String mainPicSeqNo) {
-		List<SupplierProductPicEntity> supplierProductPicEntities = SupplierProductPicRepository
+		List<SupplierProductPicEntity> supplierProductPicEntities = supplierProductPicRepository
 				.findByProductSeqNo(productSeqNo);
 		List<String> picList = supplierProductPicEntities.stream().map(SupplierProductPicEntity::getSnCode)
 			.collect(Collectors.toList());
@@ -312,39 +311,119 @@ public class ProductServiceImpl implements ProductService {
 		return productColorSizeList;
 	}
 
-	// TODO 下次先寫上傳圖片的部分
 	@Override
-	public void editProduct(QueryProductBySeqNoParam queryProductBySeqNoParam, boolean isNeedUpdatePic) {
-		insertOrUpdateProduct(queryProductBySeqNoParam);
-		
-		if (isNeedUpdatePic) {
-			insertOrUpdatePic(queryProductBySeqNoParam.getMainPic(), queryProductBySeqNoParam.getPicList(), 
-			queryProductBySeqNoParam.getProductSeqNo(), queryProductBySeqNoParam.getUserId());
-		}
+	@Transactional(rollbackFor = { Exception.class })
+	public void editProduct(QueryProductBySeqNoParam queryProductBySeqNoParam, MultipartFile mainPicFile, List<MultipartFile> picFiles) throws IOException {
+
+		PictureSnCodeBean pictureSnCodeBean = updatePicture(mainPicFile, picFiles, queryProductBySeqNoParam.getUserId());
+		queryProductBySeqNoParam.setMainPicSnCode(pictureSnCodeBean.getMainPicSnCode());
+		queryProductBySeqNoParam.setPicSnCodeList(pictureSnCodeBean.getPicSnCodeList());
+
+		// SKU跟MPN也在這裡面更新
+		insertOrUpdateProduct(queryProductBySeqNoParam, true);		
 
 		insertOrUpdateProductColorSizeMapping(queryProductBySeqNoParam.getProductColorSizeList(), 
 			queryProductBySeqNoParam.getProductSeqNo(), queryProductBySeqNoParam.getUserId());
 	}
 
-	private void insertOrUpdateProduct(QueryProductBySeqNoParam queryProductBySeqNoParam) {
+	@Transactional
+	@Override
+	public void editProductWithoutPic(QueryProductBySeqNoParam queryProductBySeqNoParam) {
+		// SKU跟MPN也在這裡面更新
+		insertOrUpdateProduct(queryProductBySeqNoParam, false);
+
+		insertOrUpdateProductColorSizeMapping(queryProductBySeqNoParam.getProductColorSizeList(), 
+			queryProductBySeqNoParam.getProductSeqNo(), queryProductBySeqNoParam.getUserId());		
+	}
+	
+	private PictureSnCodeBean updatePicture(MultipartFile mainPicFile, List<MultipartFile> picFiles, String userId) throws IOException {
+
+		CommonPictureEntity mainPictureEntity = new CommonPictureEntity();
+		mainPictureEntity.setPicture(mainPicFile.getBytes());
+		if (StringUtils.isNotBlank(mainPicFile.getOriginalFilename())) {
+
+			String[] fullFileName = mainPicFile.getOriginalFilename().split("\\.");
+			if (fullFileName.length > 0) {
+				mainPictureEntity.setPictureName(fullFileName[0].toString());
+			}
+			if (fullFileName.length > 1) {
+				mainPictureEntity.setPictureExtension(fullFileName[1].toString());
+			}
+		}
+		mainPictureEntity.setCreateUser(userId);
+		mainPictureEntity.setCreateDt(new Date());
+		mainPictureEntity.setUpdateUser(userId);
+		mainPictureEntity.setUpdateDt(new Date());
+		mainPictureEntity = commonPictureRepository.save(mainPictureEntity);
+
+		PictureSnCodeBean pictureSnCodeBean = new PictureSnCodeBean();
+		pictureSnCodeBean.setMainPicSnCode(String.valueOf(mainPictureEntity.getSnCode()));
+
+		List<String> picSnCodeList = new ArrayList<>();
+		for (MultipartFile picFile : picFiles) {
+			CommonPictureEntity pictureEntity = new CommonPictureEntity();
+			pictureEntity.setPicture(picFile.getBytes());
+
+			String[] fullFileName = picFile.getOriginalFilename().split("\\.");
+			if (fullFileName.length > 0) {
+				pictureEntity.setPictureName(fullFileName[0].toString());
+			}
+			if (fullFileName.length > 1) {
+				pictureEntity.setPictureExtension(fullFileName[1].toString());
+			}
+
+			pictureEntity.setCreateUser(userId);
+			pictureEntity.setCreateDt(new Date());
+			pictureEntity.setUpdateUser(userId);
+			pictureEntity.setUpdateDt(new Date());
+			pictureEntity = commonPictureRepository.save(pictureEntity);
+			picSnCodeList.add(String.valueOf(pictureEntity.getSnCode()));
+		}
+		pictureSnCodeBean.setPicSnCodeList(picSnCodeList);
+		return pictureSnCodeBean;
+	}
+
+	private void insertOrUpdateProduct(QueryProductBySeqNoParam queryProductBySeqNoParam, 
+		boolean isNeedUpdatePic) {
 
 		SupplierProductEntity supplierProductEntity = new SupplierProductEntity();
+		boolean isUpdateProduct = true;
 
-		// 1. 若是編輯則取出原本的資料，若新增則直接set資料
+		// 1. 若是編輯則取出原本的資料(會先把圖片、SKU、MPN塞入)，若新增則直接set資料
 		if (StringUtils.isNotBlank(queryProductBySeqNoParam.getProductSeqNo())) {
 			Optional<SupplierProductEntity> supplierProductOptional = supplierProductRepository.findById(Long.parseLong(queryProductBySeqNoParam.getProductSeqNo()));
 			if (supplierProductOptional.isPresent()) {
 				supplierProductEntity = supplierProductOptional.get();
 			}
+
+			if (isNeedUpdatePic) {
+				// 更新MainPic資料
+				insertOrUpdatePic(queryProductBySeqNoParam.getMainPicSnCode(), queryProductBySeqNoParam.getPicSnCodeList(), 
+				queryProductBySeqNoParam.getProductSeqNo(), queryProductBySeqNoParam.getUserId());
+				if (StringUtils.isNotBlank(queryProductBySeqNoParam.getMainPicSnCode())) {
+					supplierProductEntity.setMainPicSnCode(queryProductBySeqNoParam.getMainPicSnCode());
+				}
+			}
+
+			// 更新SKU資料
+			String mainSkuSeqNo = insertOrUpdateSku(queryProductBySeqNoParam.getSkuList(), queryProductBySeqNoParam.getProductSeqNo(), queryProductBySeqNoParam.getUserId());
+			if (StringUtils.isNotEmpty(mainSkuSeqNo)) {
+				supplierProductEntity.setMainSkuSeqNo(mainSkuSeqNo);
+			}
+
+			// 更新MPN資料
+			String mainMpnSeqNo = insertOrUpdateMpn(queryProductBySeqNoParam.getMpnList(), queryProductBySeqNoParam.getProductSeqNo(), queryProductBySeqNoParam.getUserId());
+			if (StringUtils.isNotEmpty(mainMpnSeqNo)) {
+				supplierProductEntity.setMainMpnSeqNo(mainMpnSeqNo);
+			}
+
 		} else {
 			supplierProductEntity.setCreateUser(queryProductBySeqNoParam.getUserId());
 			supplierProductEntity.setCreateDt(new Date());
+			isUpdateProduct = false;
 		}
 
 		// 2. set資料
-		if (StringUtils.isNotBlank(queryProductBySeqNoParam.getMainPic())) {
-			supplierProductEntity.setMainPicSeqNo(Long.parseLong(queryProductBySeqNoParam.getMainPic()));
-		}
 		supplierProductEntity.setProductName(queryProductBySeqNoParam.getProductName());
 		supplierProductEntity.setCost(queryProductBySeqNoParam.getCost());
 		supplierProductEntity.setPrice(queryProductBySeqNoParam.getPrice());
@@ -353,25 +432,37 @@ public class ProductServiceImpl implements ProductService {
 		supplierProductEntity.setProductDesc(queryProductBySeqNoParam.getProductDesc());
 		supplierProductEntity.setVendorSeqNo(queryProductBySeqNoParam.getVendorSeqNo());
 
-		// 更新SKU資料
-		String mainSkuSeqNo = insertOrUpdateSku(queryProductBySeqNoParam.getSkuList(), queryProductBySeqNoParam.getProductSeqNo(), queryProductBySeqNoParam.getUserId());
-		if (StringUtils.isNotEmpty(mainSkuSeqNo)) {
-			supplierProductEntity.setMainSkuSeqNo(mainSkuSeqNo);
-		}
-
-		// 更新MPN資料
-		String mainMpnSeqNo = insertOrUpdateMpn(queryProductBySeqNoParam.getMpnList(), queryProductBySeqNoParam.getProductSeqNo(), queryProductBySeqNoParam.getUserId());
-		if (StringUtils.isNotEmpty(mainMpnSeqNo)) {
-			supplierProductEntity.setMainMpnSeqNo(mainMpnSeqNo);
-		}
-
 		supplierProductEntity.setUpdateUser(queryProductBySeqNoParam.getUserId());
 		supplierProductEntity.setUpdateDt(new Date());
 
-		System.out.println("LOOK1 supplierProductEntity = " + supplierProductEntity);
 		supplierProductEntity = supplierProductRepository.save(supplierProductEntity);
 		queryProductBySeqNoParam.setProductSeqNo(String.valueOf(supplierProductEntity.getSeqNo()));
-		System.out.println("LOOK2 supplierProductEntity = " + supplierProductEntity);
+
+		// 若是Insert產品，則需要後續再塞入產品的MainPic、MainSku、MainMpn
+		if (!isUpdateProduct) {
+			if (isNeedUpdatePic) {
+				// 更新MainPic資料
+				insertOrUpdatePic(queryProductBySeqNoParam.getMainPicSnCode(), queryProductBySeqNoParam.getPicSnCodeList(), 
+				queryProductBySeqNoParam.getProductSeqNo(), queryProductBySeqNoParam.getUserId());
+				if (StringUtils.isNotBlank(queryProductBySeqNoParam.getMainPicSnCode())) {
+					supplierProductEntity.setMainPicSnCode(queryProductBySeqNoParam.getMainPicSnCode());
+				}
+			}
+
+			// 更新SKU資料
+			String mainSkuSeqNo = insertOrUpdateSku(queryProductBySeqNoParam.getSkuList(), queryProductBySeqNoParam.getProductSeqNo(), queryProductBySeqNoParam.getUserId());
+			if (StringUtils.isNotEmpty(mainSkuSeqNo)) {
+				supplierProductEntity.setMainSkuSeqNo(mainSkuSeqNo);
+			}
+
+			// 更新MPN資料
+			String mainMpnSeqNo = insertOrUpdateMpn(queryProductBySeqNoParam.getMpnList(), queryProductBySeqNoParam.getProductSeqNo(), queryProductBySeqNoParam.getUserId());
+			if (StringUtils.isNotEmpty(mainMpnSeqNo)) {
+				supplierProductEntity.setMainMpnSeqNo(mainMpnSeqNo);
+			}
+			supplierProductRepository.save(supplierProductEntity);
+		}
+
 	}
 
 	private String insertOrUpdateSku(List<String> skuList, String productSeqNo, String userId) {
@@ -426,8 +517,38 @@ public class ProductServiceImpl implements ProductService {
 		return null;
 	}
 
-	private void insertOrUpdatePic(String mainPic, List<String> picList, String productSeqNo, String userId) {
-		// TODO 這邊有少拿檔案的Blob，前端那邊要再補這段，等等回來處理這邊
+	private String insertOrUpdatePic(String mainPic, List<String> picList, String productSeqNo, String userId) {
+		if (!CollectionUtils.isEmpty(supplierProductPicRepository.findByProductSeqNo(Long.valueOf(productSeqNo)))) {
+			supplierProductPicRepository.deleteByProductSeqNo(Long.valueOf(productSeqNo));
+		}
+		
+		List<SupplierProductPicEntity> supplierPicEntities = new ArrayList<>();
+		SupplierProductPicEntity mainPicEntity = new SupplierProductPicEntity();
+		mainPicEntity.setSnCode(mainPic);
+		mainPicEntity.setProductSeqNo(Long.valueOf(productSeqNo));
+		mainPicEntity.setCreateDt(new Date());
+		mainPicEntity.setCreateUser(userId);
+		mainPicEntity.setUpdateDt(new Date());
+		mainPicEntity.setUpdateUser(userId);
+		mainPicEntity = supplierProductPicRepository.save(mainPicEntity);
+
+		for (String pic : picList) {
+			SupplierProductPicEntity picEntity = new SupplierProductPicEntity();
+			picEntity.setSnCode(pic);
+			picEntity.setProductSeqNo(Long.valueOf(productSeqNo));
+			picEntity.setCreateDt(new Date());
+			picEntity.setCreateUser(userId);
+			picEntity.setUpdateDt(new Date());
+			picEntity.setUpdateUser(userId);
+			supplierPicEntities.add(picEntity);
+		}
+
+		supplierProductPicRepository.saveAll(supplierPicEntities);
+
+		if (mainPicEntity != null) {
+			return String.valueOf(mainPicEntity.getSnCode());
+		}
+		return null;
 	}
 
 	private void insertOrUpdateProductColorSizeMapping(List<ProductColorSizeBean> productColorSizeList, String productSeqNo, String userId) {

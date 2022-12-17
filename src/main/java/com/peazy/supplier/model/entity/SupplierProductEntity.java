@@ -21,7 +21,7 @@ public class SupplierProductEntity {
 	@Column(name = "SeqNo", unique = true, nullable = false)
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private long seqNo;
-	private long mainPicSeqNo;
+	private String mainPicSnCode;
 	private String productName;
 	private BigDecimal cost;
 	private BigDecimal price;

@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 import com.peazy.supplier.model.entity.CommonPictureEntity;
 
 @Repository
-public interface CommonPictureRepository extends JpaRepository<CommonPictureEntity, String> {
+public interface CommonPictureRepository extends JpaRepository<CommonPictureEntity, Long> {
 
     
 }

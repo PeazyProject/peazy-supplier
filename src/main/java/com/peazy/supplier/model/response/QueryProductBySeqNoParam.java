@@ -25,8 +25,8 @@ public class QueryProductBySeqNoParam {
     private String category;
     private String productStatus;
     private String productDesc;
-    private String mainPic;
-    private List<String> picList;
+    private String mainPicSnCode;
+    private List<String> picSnCodeList;
     private List<ProductColorSizeBean> productColorSizeList;
     private String vendorSeqNo;
     private String userId;

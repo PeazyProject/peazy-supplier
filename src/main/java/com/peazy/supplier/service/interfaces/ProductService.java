@@ -1,6 +1,9 @@
 package com.peazy.supplier.service.interfaces;
 
+import java.io.IOException;
 import java.util.List;
+
+import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.peazy.supplier.model.bean.BlobDocumentBean;
@@ -24,6 +27,8 @@ public interface ProductService {
 
 	QueryProductBySeqNoParam queryProductBySeqNo(Long seqNo) throws JsonProcessingException;
 
-	void editProduct(QueryProductBySeqNoParam queryProductBySeqNoParam, boolean isNeedUpdatePic);
+	void editProductWithoutPic(QueryProductBySeqNoParam queryProductBySeqNoParam);
+
+	void editProduct(QueryProductBySeqNoParam queryProductBySeqNoParam, MultipartFile mainPicFile, List<MultipartFile> picFiles) throws IOException;
 
 }
