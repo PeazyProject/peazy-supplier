@@ -20,6 +20,7 @@ import com.peazy.supplier.enumerate.PlaceOrderErrorCodeEnumImpl;
 import com.peazy.supplier.exception.ErrorCodeException;
 import com.peazy.supplier.model.request.OrderProductsRequest;
 import com.peazy.supplier.model.response.GetOrderProductStringResponse;
+import com.peazy.supplier.model.response.QueryOrderProductDetailResponse;
 import com.peazy.supplier.model.response.QueryOrderProductResponse;
 import com.peazy.supplier.model.response.QueryVendorResponse;
 import com.peazy.supplier.service.interfaces.PlaceOrderService;
@@ -31,22 +32,32 @@ public class PlaceOrderController {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
-    private PlaceOrderService orderService;
+    private PlaceOrderService placeOrderService;
 
     @GetMapping(value = "/getVendorList")
     public ResponseEntity<QueryVendorResponse> queryVendorList()
             throws JsonProcessingException {
         QueryVendorResponse response = new QueryVendorResponse();
-        response.setVendorList(orderService.getVendorList());
+        response.setVendorList(placeOrderService.getVendorList());
         return ResponseEntity.ok(response);
     }
 
     @GetMapping(value = "/queryOrderProductList")
-    public ResponseEntity<QueryOrderProductResponse> queryOrderProductList(String vendorSeqNo, String type)
+    public ResponseEntity<QueryOrderProductResponse> queryOrderProductList(Long vendorSeqNo, String type)
             throws JsonProcessingException {
         logger.info("queryOrderProductList vendorSeqNo : {}, type = {}", vendorSeqNo, type);
         QueryOrderProductResponse response = new QueryOrderProductResponse();
-        response.setOrderProductList(orderService.getOrderProductList(Long.valueOf(vendorSeqNo), type));
+        response.setOrderProductList(placeOrderService.getOrderProductList(vendorSeqNo, type));
+        logger.info("response = {}", response);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping(value = "/queryOrderProductDetailList")
+    public ResponseEntity<QueryOrderProductDetailResponse> queryOrderProductDetailList(Long productSeqNo)
+            throws JsonProcessingException {
+        logger.info("queryOrderProductDetailList productSeqNo = {}", productSeqNo);
+        QueryOrderProductDetailResponse response = new QueryOrderProductDetailResponse();
+        response.setOrderProductDetailList(placeOrderService.getOrderProductDetailList(productSeqNo));
         logger.info("response = {}", response);
         return ResponseEntity.ok(response);
     }
@@ -58,7 +69,7 @@ public class PlaceOrderController {
         logger.info("orderProducts = {}", request);
         try {
             if (!CollectionUtils.isEmpty(request.getOrderProductList())) {
-                orderService.orderProducts(request.getOrderProductList());
+                placeOrderService.orderProducts(request.getOrderProductList());
             }
         } catch (Exception e) {
             throw new ErrorCodeException(PlaceOrderErrorCodeEnumImpl.ORDER_PRODUCTS_FAIL);
@@ -72,7 +83,7 @@ public class PlaceOrderController {
             throws JsonProcessingException {
         logger.info("request : {}", request);
         GetOrderProductStringResponse response = new GetOrderProductStringResponse();
-        response.setOrderProductString(orderService.exportPlaceOrder(request.getOrderProductList()));
+        response.setOrderProductString(placeOrderService.exportPlaceOrder(request.getOrderProductList()));
         return ResponseEntity.ok(response);
     }
 }
