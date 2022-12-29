@@ -47,13 +47,17 @@ public interface SupplierProductViewRepository extends JpaRepository<SupplierPro
 
         @Query(value = "SELECT supplier_product_view.*"
                         + "FROM supplier_product_view "
-                        + "WHERE VendorSeqNo = :vendorSeqNo AND if(:type = 'notOrder', NotOrderCnt > 0, 1 = 1) AND if(:type = 'stock', NotOrderCnt > 0, 1 = 1) "
+                        + "WHERE VendorSeqNo = :vendorSeqNo "
                         + "ORDER BY ProductSeqNo", nativeQuery = true)
-        public List<SupplierProductViewEntity> queryOrderProduct(@Param("vendorSeqNo") Long vendorSeqNo,
-                        @Param("type") String type);
+        public List<SupplierProductViewEntity> queryOrderProduct(@Param("vendorSeqNo") Long vendorSeqNo);
 
         @Query(value = "SELECT supplier_product_view.* "
                         + "FROM supplier_product_view "
-                        + "WHERE ProductSeqNo = :ProductSeqNo ", nativeQuery = true)
-        public List<SupplierProductViewEntity> queryOrderProductBySeqNo(@Param("ProductSeqNo") Long ProductSeqNo);
+                        + "WHERE ProductSeqNo = :productSeqNo ", nativeQuery = true)
+        public List<SupplierProductViewEntity> queryOrderProductBySeqNo(@Param("productSeqNo") Long productSeqNo);
+
+        @Query(value = "SELECT supplier_product_view.* "
+                        + "FROM supplier_product_view "
+                        + "WHERE PCSMSeqNo IN (:pcsmSeqNo) ", nativeQuery = true)
+        public List<SupplierProductViewEntity> queryOrderProductByPCSMSeqNo(@Param("pcsmSeqNo") List<Long> pcsmSeqNo);
 }

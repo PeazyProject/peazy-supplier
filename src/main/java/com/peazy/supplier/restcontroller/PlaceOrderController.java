@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.peazy.supplier.enumerate.PlaceOrderErrorCodeEnumImpl;
+import com.peazy.supplier.enumerate.QueryTypeEnum;
 import com.peazy.supplier.exception.ErrorCodeException;
 import com.peazy.supplier.model.request.OrderProductsRequest;
 import com.peazy.supplier.model.response.GetOrderProductStringResponse;
@@ -43,21 +44,22 @@ public class PlaceOrderController {
     }
 
     @GetMapping(value = "/queryOrderProductList")
-    public ResponseEntity<QueryOrderProductResponse> queryOrderProductList(Long vendorSeqNo, String type)
+    public ResponseEntity<QueryOrderProductResponse> queryOrderProductList(Long vendorSeqNo)
             throws JsonProcessingException {
-        logger.info("queryOrderProductList vendorSeqNo : {}, type = {}", vendorSeqNo, type);
+        logger.info("queryOrderProductList vendorSeqNo : {}", vendorSeqNo);
         QueryOrderProductResponse response = new QueryOrderProductResponse();
-        response.setOrderProductList(placeOrderService.getOrderProductList(vendorSeqNo, type));
+        response.setOrderProductList(placeOrderService.getOrderProductList(vendorSeqNo));
         logger.info("response = {}", response);
         return ResponseEntity.ok(response);
     }
 
     @GetMapping(value = "/queryOrderProductDetailList")
-    public ResponseEntity<QueryOrderProductDetailResponse> queryOrderProductDetailList(Long productSeqNo)
+    public ResponseEntity<QueryOrderProductDetailResponse> queryOrderProductDetailList(Long productSeqNo,
+            QueryTypeEnum type)
             throws JsonProcessingException {
-        logger.info("queryOrderProductDetailList productSeqNo = {}", productSeqNo);
+        logger.info("queryOrderProductDetailList productSeqNo = {}, type = {}", productSeqNo, type);
         QueryOrderProductDetailResponse response = new QueryOrderProductDetailResponse();
-        response.setOrderProductDetailList(placeOrderService.getOrderProductDetailList(productSeqNo));
+        response.setOrderProductDetailList(placeOrderService.getOrderProductDetailList(productSeqNo, type));
         logger.info("response = {}", response);
         return ResponseEntity.ok(response);
     }
@@ -68,8 +70,8 @@ public class PlaceOrderController {
             throws JsonProcessingException {
         logger.info("orderProducts = {}", request);
         try {
-            if (!CollectionUtils.isEmpty(request.getOrderProductList())) {
-                placeOrderService.orderProducts(request.getOrderProductList());
+            if (!CollectionUtils.isEmpty(request.getSeqList())) {
+                placeOrderService.orderProducts(request.getSeqList());
             }
         } catch (Exception e) {
             throw new ErrorCodeException(PlaceOrderErrorCodeEnumImpl.ORDER_PRODUCTS_FAIL);
@@ -83,7 +85,7 @@ public class PlaceOrderController {
             throws JsonProcessingException {
         logger.info("request : {}", request);
         GetOrderProductStringResponse response = new GetOrderProductStringResponse();
-        response.setOrderProductString(placeOrderService.exportPlaceOrder(request.getOrderProductList()));
+        response.setOrderProductStringList(placeOrderService.exportPlaceOrder(request.getSeqList()));
         return ResponseEntity.ok(response);
     }
 }

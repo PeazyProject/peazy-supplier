@@ -9,7 +9,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.peazy.supplier.enumerate.QueryTypeEnum;
 import com.peazy.supplier.model.bean.PlaceOrderBean;
+import com.peazy.supplier.model.bean.PlaceOrderDetailBean;
 import com.peazy.supplier.model.entity.SupplierProductColorSizeMappingEntity;
 import com.peazy.supplier.model.entity.SupplierProductViewEntity;
 import com.peazy.supplier.model.entity.SupplierVendorEntity;
@@ -35,40 +37,56 @@ public class PlaceOrderServiceImpl implements PlaceOrderService {
         return supplierVendorRepository.findAll();
     }
 
-    public List<PlaceOrderBean> getOrderProductList(Long vendorSeqNo, String type)
+    public List<PlaceOrderBean> getOrderProductList(Long vendorSeqNo)
             throws JsonProcessingException {
-        List<SupplierProductViewEntity> list = supplierProductViewRepository.queryOrderProduct(vendorSeqNo, type);
+        List<SupplierProductViewEntity> list = supplierProductViewRepository.queryOrderProduct(vendorSeqNo);
         List<PlaceOrderBean> orderProductList = new ArrayList<>();
         // Map<PlaceOrderBean, BigDecimal> map;
-        list.stream().forEach(entity -> {
-            Optional<PlaceOrderBean> placeOrderBeanOpt = orderProductList.stream()
-                    .filter(placeOrderBean -> placeOrderBean.getProductSeqNo() == entity.getProductSeqNo()).findFirst();
-            if (placeOrderBeanOpt.isPresent()) {
-                placeOrderBeanOpt.get()
-                        .setNotOrderCnt(placeOrderBeanOpt.get().getNotOrderCnt().add(entity.getNotOrderCnt()));
-            } else {
-                PlaceOrderBean bean = new PlaceOrderBean();
-                bean.setProductSeqNo(entity.getProductSeqNo());
-                bean.setProductName(entity.getProductName());
-                bean.setSku(entity.getSku());
-                bean.setCategory(entity.getCategory());
-                bean.setNotOrderCnt(entity.getNotOrderCnt());
-                orderProductList.add(bean);
-            }
-        });
+        list.stream().filter(
+                entity -> entity.getNotOrderCnt().compareTo(BigDecimal.ZERO) > 0)
+                .forEach(entity -> {
+                    Optional<PlaceOrderBean> placeOrderBeanOpt = orderProductList.stream()
+                            .filter(placeOrderBean -> placeOrderBean.getProductSeqNo()
+                                    .compareTo(entity.getProductSeqNo()) == 0)
+                            .findFirst();
+                    if (placeOrderBeanOpt.isPresent()) {
+                        placeOrderBeanOpt.get()
+                                .setNotOrderCnt(placeOrderBeanOpt.get().getNotOrderCnt().add(entity.getNotOrderCnt()));
+                    } else {
+                        PlaceOrderBean bean = new PlaceOrderBean(entity);
+                        orderProductList.add(bean);
+                    }
+                });
         return orderProductList;
     }
 
-    public List<SupplierProductViewEntity> getOrderProductDetailList(Long productSeqNo)
+    public List<PlaceOrderDetailBean> getOrderProductDetailList(Long productSeqNo, QueryTypeEnum type)
             throws JsonProcessingException {
-        return supplierProductViewRepository.queryOrderProductBySeqNo(productSeqNo);
+        List<SupplierProductViewEntity> orderProductList = supplierProductViewRepository
+                .queryOrderProductBySeqNo(productSeqNo);
+        List<PlaceOrderDetailBean> detailList = new ArrayList<>();
+        orderProductList.forEach(entity -> {
+            BigDecimal productCnt = BigDecimal.ZERO;
+            switch (type) {
+                case NOT_ORDER:
+                    productCnt = entity.getNotOrderCnt();
+                    break;
+                case STOCK:
+                    productCnt = entity.getOrderedCnt().add(entity.getCheckOrderCnt());
+                    break;
+            }
+            PlaceOrderDetailBean bean = new PlaceOrderDetailBean(entity);
+            bean.setProductCnt(productCnt);
+            detailList.add(bean);
+        });
+        return detailList;
     }
 
-    public void orderProducts(List<SupplierProductViewEntity> orderProductList) throws JsonProcessingException {
+    public void orderProducts(List<Long> seqList) throws JsonProcessingException {
         List<SupplierProductColorSizeMappingEntity> pcsmList = new ArrayList<>();
-        orderProductList.forEach(orderProduct -> {
+        seqList.forEach(seq -> {
             Optional<SupplierProductColorSizeMappingEntity> pcsmOptinal = supplierProductColorSizeMappingRepository
-                    .findById(orderProduct.getPcsmSeqNo());
+                    .findById(seq);
             if (pcsmOptinal.isPresent()) {
                 SupplierProductColorSizeMappingEntity pcsm = pcsmOptinal.get();
                 pcsm.setOrderedCnt(pcsm.getOrderedCnt().add(pcsm.getNotOrderCnt()));
@@ -79,11 +97,13 @@ public class PlaceOrderServiceImpl implements PlaceOrderService {
         supplierProductColorSizeMappingRepository.saveAll(pcsmList);
     }
 
-    public String exportPlaceOrder(List<SupplierProductViewEntity> orderProductList) {
-        StringBuilder sb = new StringBuilder();
+    public List<String> exportPlaceOrder(List<Long> seqList) {
+        List<String> orderProductStringList = new ArrayList<>();
+        List<SupplierProductViewEntity> orderProductList = supplierProductViewRepository
+                .queryOrderProductByPCSMSeqNo(seqList);
         orderProductList.forEach(orderProduct -> {
-            sb.append(StringUtils.getPlaceOrderString(orderProduct)).append("\n\r");
+            orderProductStringList.add(StringUtils.getPlaceOrderString(orderProduct));
         });
-        return sb.toString();
+        return orderProductStringList;
     }
 }

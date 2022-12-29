@@ -1,8 +1,10 @@
 package com.peazy.supplier.model.response;
 
+import java.util.List;
+
 import lombok.Data;
 
 @Data
 public class GetOrderProductStringResponse {
-    private String orderProductString;
+    private List<String> orderProductStringList;
 }
